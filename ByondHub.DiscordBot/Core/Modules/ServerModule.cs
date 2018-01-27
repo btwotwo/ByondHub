@@ -1,11 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Services;
+using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Logging;
 
 namespace ByondHub.DiscordBot.Core.Modules
 {
+    [RequireUserPermission(GuildPermission.BanMembers)]
     [Group("server")]
     public class ServerModule : ModuleBase<SocketCommandContext>
     {

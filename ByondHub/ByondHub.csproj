@@ -20,5 +20,9 @@
   <ItemGroup>
     <ProjectReference Include="..\ByondHub.Shared\ByondHub.Shared.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="appsettings.json" CopyToOutputDirectory="Never"></None>
+  </ItemGroup>
 
 </Project>
