@@ -90,12 +90,15 @@ namespace ByondHub.DiscordBot
 
             var context = new SocketCommandContext(_client, message);
             var result = await _commands.ExecuteAsync(context, argPos, _services);
-#if DEBUG
+
             if (!result.IsSuccess)
             {
+#if DEBUG
                 await context.Channel.SendMessageAsync(result.ErrorReason);
-            }
 #endif
+                _logger.LogError(result.ErrorReason);
+            }
+
         }
         private Task Log(LogMessage message)
         {

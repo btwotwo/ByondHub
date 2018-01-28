@@ -6,13 +6,14 @@ namespace ByondHub.Core.Models
     public class ServerInstance
     {
         private Process _process;
-        private readonly BuildModel _build;
         private readonly int _port;
         private readonly string _dreamDaemonPath;
+        public BuildModel Build { get; }
+        public bool IsRunning => !_process.HasExited;
 
         public ServerInstance(BuildModel build, string dreamDaemonPath, int port)
         {
-            _build = build;
+            Build = build;
             _port = port;
             _dreamDaemonPath = dreamDaemonPath;
         }
@@ -21,7 +22,7 @@ namespace ByondHub.Core.Models
         {
             var info = new ProcessStartInfo($"{_dreamDaemonPath}")
             {
-                Arguments = $"{_build.Path}/{_build.ExecutableName}.dmb {_port} -safe -invisible -logself",
+                Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {_port} -safe -invisible -logself",
                 CreateNoWindow = true,
                 UseShellExecute = true
             };
@@ -34,5 +35,7 @@ namespace ByondHub.Core.Models
             _process.Kill();
             _process.Dispose();
         }
+
+
     }
 }

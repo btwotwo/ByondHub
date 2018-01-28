@@ -6,7 +6,7 @@ using ByondHub.Core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace ByondHub.Core.Services
+namespace ByondHub.Core.Services.ServerService
 {
     public class ServerService
     {
@@ -14,6 +14,7 @@ namespace ByondHub.Core.Services
         private readonly IConfiguration _config;
         private readonly ILogger<ServerService> _logger;
         private readonly BuildModel[] _builds;
+        private readonly ServerUpdater _updater;
 
         public ServerService(IConfiguration config, ILogger<ServerService> logger)
         {
@@ -21,18 +22,19 @@ namespace ByondHub.Core.Services
             _config = config;
             _logger = logger;
             _builds = _config.GetSection("Hub").GetSection("Builds").Get<BuildModel[]>();
+            _updater = new ServerUpdater(config, logger);
         }
 
         public void Start(string serverId, int port)
         {
             if (_servers.ContainsKey(serverId))
             {
-                throw new Exception($"Server with id {serverId} is already started.");
+                throw new Exception($"Server with id \"{serverId}\" is already started.");
             }
             var build = _builds.FirstOrDefault(x => x.Id == serverId);
             if (build == null)
             {
-                throw new Exception($"Server with id {serverId} is not found.");
+                throw new Exception($"Server with id \"{serverId}\" is not found.");
             }
 
             var server = new ServerInstance(build, _config["Hub:DreamDaemonPath"], port);
@@ -53,6 +55,29 @@ namespace ByondHub.Core.Services
 
             _servers.Remove(serverId);
             _logger.LogInformation($"Killed server with id {serverId}.");
+        }
+
+        public string Update(string serverId)
+        {
+            var build = _builds.SingleOrDefault(x => x.Id == serverId);
+            if (build == null)
+            {
+                throw new Exception($"Server with id \"{serverId}\" is not found.");
+            }
+            if (_servers.ContainsKey(serverId))
+            {
+                throw new Exception($"Server with id \"{serverId}\" is started. Please stop it first.");
+            }
+
+            var res = _updater.Update(build);
+            string output = res.output;
+            string errors = res.errors;
+            if (!string.IsNullOrEmpty(errors) && !errors.Equals(Environment.NewLine))
+            {
+                throw new Exception($"There was build errors: \n {res.errors}");
+            }
+
+            return output;
         }
     }
 }

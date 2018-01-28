@@ -1,5 +1,6 @@
 ﻿using System;
 using ByondHub.Core.Services;
+using ByondHub.Core.Services.ServerService;
 using ByondHub.Shared.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -40,6 +41,18 @@ namespace ByondHub.Controllers
             }
             _service.Stop(serverId);
             return Json(new SuccessResponse{Message = $"Stopped server with id \"{serverId}\""});
+        }
+
+        [HttpPost("update/{serverId}")]
+        public IActionResult Update(string serverId, [FromForm] string secret)
+        {
+            if (!string.Equals(secret, _secret))
+            {
+                throw new Exception("Authentication error.");
+            }
+
+            string res = _service.Update(serverId);
+            return Json(new SuccessResponse {Message = $"Server {serverId} is updated.", Data = res});
         }
     }
 }
