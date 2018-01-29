@@ -1,4 +1,5 @@
-﻿using ByondHub.Core.Middlewares;
+﻿using System.IO;
+using ByondHub.Core.Middlewares;
 using ByondHub.Core.Services;
 using ByondHub.Core.Services.ServerService;
 using Microsoft.AspNetCore.Builder;
@@ -16,12 +17,19 @@ namespace ByondHub
         }
 
         public IConfiguration Configuration { get; }
+        public IConfiguration Config { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var configBuilder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("config.json", false);
+
+            Config = configBuilder.Build();
             services.AddMvc();
             services.AddSingleton<ServerService>();
+            services.AddSingleton(Config);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

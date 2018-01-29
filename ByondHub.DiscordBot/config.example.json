@@ -1,0 +1,12 @@
+{
+  "Bot": {
+    "Token": "your bot token",
+    "Prefix": "your bot prefix",
+    "Backend": {
+      "Host": "backend host",
+      "Port": "backend port",
+      "SecretCode": "code from backend config"
+    },
+    "AdministratorRoles":  ["todo"] 
+  }
+}

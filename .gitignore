@@ -260,4 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 /ByondHub.DiscordBot/config.json
-**/appsettings.json
+/ByondHub/config.json

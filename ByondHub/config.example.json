@@ -1,0 +1,20 @@
+﻿{
+  "Hub": {
+    "DreamDaemonPath": "/path/to/dreamdaemon",
+    "DreamMakerPath": "/path/to/dreammaker (dm.exe on windows)",
+    "Builds": [
+      {
+        "Id": "serverId",
+        "Path": "path/to/build/directory",
+        "ExecutableName": "baystation12",
+        "RepositoryUsername": "if you don't have private repo, you can put some randomness here",
+        "RepositoryEmail": "random",
+        "RepositoryPassword": "wowser"
+      }
+    ],
+    "SecretCode": "secret code for bot"
+  },
+  "Server": {
+    "Port": "port to start on"
+  }
+}
