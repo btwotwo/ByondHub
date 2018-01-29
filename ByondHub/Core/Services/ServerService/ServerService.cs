@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using ByondHub.Core.Configuration;
@@ -15,6 +16,7 @@ namespace ByondHub.Core.Services.ServerService
         private readonly ILogger<ServerService> _logger;
         private readonly BuildModel[] _builds;
         private readonly ServerUpdater _updater;
+        private readonly List<string> _updating;
 
         public ServerService(IConfiguration config, ILogger<ServerService> logger)
         {
@@ -23,6 +25,7 @@ namespace ByondHub.Core.Services.ServerService
             _logger = logger;
             _builds = _config.GetSection("Hub").GetSection("Builds").Get<BuildModel[]>();
             _updater = new ServerUpdater(config, logger);
+            _updating = new List<string>();
         }
 
         public void Start(string serverId, int port)
@@ -59,25 +62,46 @@ namespace ByondHub.Core.Services.ServerService
 
         public string Update(string serverId)
         {
-            var build = _builds.SingleOrDefault(x => x.Id == serverId);
-            if (build == null)
+            try
             {
-                throw new Exception($"Server with id \"{serverId}\" is not found.");
+                if (_updating.Contains(serverId))
+                {
+                    throw new Exception(
+                        $"Server with id \"{serverId}\" is already updating. Please wait until update process is finished.");
+                }
+
+                var build = _builds.SingleOrDefault(x => x.Id == serverId);
+                if (build == null)
+                {
+                    throw new Exception($"Server with id \"{serverId}\" is not found.");
+                }
+                if (_servers.ContainsKey(serverId))
+                {
+                    throw new Exception($"Server with id \"{serverId}\" is started. Please stop it first.");
+                }
+
+                _updating.Add(serverId);
+                var res = _updater.Update(build);
+                string output = res.output;
+                string errors = res.errors;
+                if (!string.IsNullOrEmpty(errors) && !errors.Equals(Environment.NewLine))
+                {
+                    throw new Exception($"There was build errors:{Environment.NewLine}{res.errors}");
+                }
+
+                return output;
+
             }
-            if (_servers.ContainsKey(serverId))
+            catch (Exception e)
             {
-                throw new Exception($"Server with id \"{serverId}\" is started. Please stop it first.");
+                _logger.LogError(e.Message);
+                throw;
+            }
+            finally
+            {
+                _updating.RemoveAll(x => x == serverId);
             }
 
-            var res = _updater.Update(build);
-            string output = res.output;
-            string errors = res.errors;
-            if (!string.IsNullOrEmpty(errors) && !errors.Equals(Environment.NewLine))
-            {
-                throw new Exception($"There was build errors: \n {res.errors}");
-            }
-
-            return output;
         }
     }
 }
