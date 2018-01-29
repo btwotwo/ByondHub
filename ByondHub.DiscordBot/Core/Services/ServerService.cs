@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Globals;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +18,7 @@ namespace ByondHub.DiscordBot.Core.Services
         {
             _secret = config["Bot:Backend:SecretCode"];
             var uriBuilder = new UriBuilder("http", config["Bot:Backend:Host"], int.Parse(config["Bot:Backend:Port"]));
-            _http = new HttpClient {BaseAddress = uriBuilder.Uri};
+            _http = new HttpClient {BaseAddress = uriBuilder.Uri, Timeout = Timeout.InfiniteTimeSpan };
         }
 
         public async Task<string> SendStartRequestAsync(string serverId, int port)
@@ -58,6 +58,27 @@ namespace ByondHub.DiscordBot.Core.Services
 
             var result = JsonConvert.DeserializeObject<dynamic>(resultJson);
             return responseMessage.IsSuccessStatusCode ? result.message : result.error;
+        }
+
+        public async Task<(dynamic response, bool success)> SendUpdateRequestAsync(string serverId)
+        {
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("secret", _secret) 
+            });
+
+            var response = await _http.PostAsync($"{ApiEndpoints.ServerUpdate}/{serverId}", content);
+            string resultJson = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrEmpty(resultJson))
+            {
+                throw new Exception($"Got {response.StatusCode}");
+            }
+
+            var result = JsonConvert.DeserializeObject<dynamic>(resultJson);
+            return response.IsSuccessStatusCode
+                ? (result.data, response.IsSuccessStatusCode)
+                : (result.error, response.IsSuccessStatusCode);
         }
     }
 }
