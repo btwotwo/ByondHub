@@ -9,8 +9,6 @@ Then run Hub and Bot with `dotnet run` in corresponding directories. You can get
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
-
 You will need: 
 ```
 .NET Core v2.1.4
