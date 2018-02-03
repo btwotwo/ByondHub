@@ -18,4 +18,14 @@
     <ProjectReference Include="..\ByondHub.Shared\ByondHub.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="config.json">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+
+    <Content Update="config.example.json">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
