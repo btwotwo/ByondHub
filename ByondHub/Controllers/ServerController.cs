@@ -51,7 +51,7 @@ namespace ByondHub.Controllers
                 throw new Exception("Authentication error.");
             }
 
-            var res = _service.Update(serverId, request.Branch, request.c);
+            var res = _service.Update(serverId, request.Branch, request.CommitHash);
 
             if (string.IsNullOrEmpty(res.ErrorMessage) || res.ErrorMessage == Environment.NewLine)
             {
