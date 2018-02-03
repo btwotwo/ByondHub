@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using ByondHub.Shared.Web;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
@@ -30,7 +31,7 @@ namespace ByondHub.Core.Middlewares
         private static Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
             const HttpStatusCode code = HttpStatusCode.BadRequest;
-            string result = JsonConvert.SerializeObject(new {error = ex.Message});
+            string result = JsonConvert.SerializeObject(new FailResponse {Error = ex.Message});
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int) code;
             return context.Response.WriteAsync(result);

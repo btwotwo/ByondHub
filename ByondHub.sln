@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ByondHub", "ByondHub\ByondHub.csproj", "{63AEFD85-8363-4D81-AB24-ECCC8B8059A1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ByondHub.Tests", "ByondHub.Tests\ByondHub.Tests.csproj", "{9B616B77-1183-4FBA-962C-30A7C9307063}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByondHub.DiscordBot", "ByondHub.DiscordBot\ByondHub.DiscordBot.csproj", "{059983B3-FC68-4638-B148-C8376175B040}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ByondHub.DiscordBot", "ByondHub.DiscordBot\ByondHub.DiscordBot.csproj", "{059983B3-FC68-4638-B148-C8376175B040}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByondHub.Shared", "ByondHub.Shared\ByondHub.Shared.csproj", "{92475C0A-1394-4A88-9B46-850A2C31A613}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ByondHub.Shared", "ByondHub.Shared\ByondHub.Shared.csproj", "{92475C0A-1394-4A88-9B46-850A2C31A613}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,20 +19,20 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{63AEFD85-8363-4D81-AB24-ECCC8B8059A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{63AEFD85-8363-4D81-AB24-ECCC8B8059A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{63AEFD85-8363-4D81-AB24-ECCC8B8059A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{63AEFD85-8363-4D81-AB24-ECCC8B8059A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63AEFD85-8363-4D81-AB24-ECCC8B8059A1}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{63AEFD85-8363-4D81-AB24-ECCC8B8059A1}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{9B616B77-1183-4FBA-962C-30A7C9307063}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9B616B77-1183-4FBA-962C-30A7C9307063}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9B616B77-1183-4FBA-962C-30A7C9307063}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9B616B77-1183-4FBA-962C-30A7C9307063}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B616B77-1183-4FBA-962C-30A7C9307063}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B616B77-1183-4FBA-962C-30A7C9307063}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{059983B3-FC68-4638-B148-C8376175B040}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{059983B3-FC68-4638-B148-C8376175B040}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{059983B3-FC68-4638-B148-C8376175B040}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{059983B3-FC68-4638-B148-C8376175B040}.Release|Any CPU.Build.0 = Release|Any CPU
+		{059983B3-FC68-4638-B148-C8376175B040}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{059983B3-FC68-4638-B148-C8376175B040}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{92475C0A-1394-4A88-9B46-850A2C31A613}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{92475C0A-1394-4A88-9B46-850A2C31A613}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92475C0A-1394-4A88-9B46-850A2C31A613}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92475C0A-1394-4A88-9B46-850A2C31A613}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92475C0A-1394-4A88-9B46-850A2C31A613}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{92475C0A-1394-4A88-9B46-850A2C31A613}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

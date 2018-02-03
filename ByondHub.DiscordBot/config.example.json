@@ -3,9 +3,9 @@
     "Token": "your bot token",
     "Prefix": "your bot prefix",
     "Backend": {
-      "Host": "backend host",
-      "Port": "backend port",
-      "SecretCode": "code from backend config"
+      "Host": "localhost",
+      "Port": "65485",
+      "SecretCode": "1234"
     },
     "AdministratorRoles":  ["todo"] 
   }
