@@ -1,9 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Services;
 using Discord;
 using Discord.Commands;
-using Microsoft.Extensions.Logging;
 
 namespace ByondHub.DiscordBot.Core.Modules
 {
@@ -12,12 +10,10 @@ namespace ByondHub.DiscordBot.Core.Modules
     public class ServerModule : ModuleBase<SocketCommandContext>
     {
         private readonly ServerService _server;
-        private readonly ILogger _logger;
 
-        public ServerModule(ServerService service, ILogger logger)
+        public ServerModule(ServerService service)
         {
             _server = service;
-            _logger = logger;
         }
 
         [Command("start")]
@@ -39,16 +35,18 @@ namespace ByondHub.DiscordBot.Core.Modules
         [Command("update", RunMode = RunMode.Async)]
         [Summary("Updates server. Provide id.")]
 
-        public async Task UpdateServer([Summary("Server id")] string id)
+        public async Task UpdateServer([Summary("Server id")] string id,
+            [Summary("Server branch name. Optional")] string branchName = "master",
+            [Summary("Server commit hash. Optional")] string commitHash = "")
         {
             await ReplyAsync($"Sent update request for \"{id}\"...");
-            var (res, success) = await _server.SendUpdateRequestAsync(id);
-            if (!success)
+            var updateResult = await _server.SendUpdateRequestAsync(id, branchName, commitHash);
+            if (updateResult.Error)
             {
-               await ReplyAsync($"Got error: {res}");
-               return;
+                await ReplyAsync($"Update request for \"{id}\" is finished. Got error: {updateResult.ErrorMessage}");
+                return;
             }
-            await ReplyAsync($"Update request is finished: {res}");
+            await ReplyAsync($"Update request for \"{id}\" is finished: {updateResult.Ouput}");
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Models;
+using ByondHub.Shared.Updates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -60,46 +61,49 @@ namespace ByondHub.Core.Services.ServerService
             _logger.LogInformation($"Killed server with id {serverId}.");
         }
 
-        public string Update(string serverId)
+        public UpdateResult Update(string serverId, string branch, string commitHash)
         {
             try
             {
                 if (_updating.Contains(serverId))
                 {
-                    throw new Exception(
-                        $"Server with id \"{serverId}\" is already updating. Please wait until update process is finished.");
+                    return new UpdateResult
+                    {
+                        Error = true,
+                        ErrorMessage =
+                            $"Server with id \"{serverId}\" is already updating. Please wait until update process is finished."
+                    };  
                 }
 
                 var build = _builds.SingleOrDefault(x => x.Id == serverId);
                 if (build == null)
                 {
-                    throw new Exception($"Server with id \"{serverId}\" is not found.");
+                    return new UpdateResult
+                    {
+                        Error = true,
+                        ErrorMessage = $"Server with id \"{serverId}\" is not found."
+                    };
                 }
                 if (_servers.ContainsKey(serverId))
                 {
-                    throw new Exception($"Server with id \"{serverId}\" is started. Please stop it first.");
+                    return new UpdateResult()
+                    {
+                        Error = true,
+                        ErrorMessage = $"Server with id \"{serverId}\" is started. Please stop it first."
+                    };
                 }
 
                 _updating.Add(serverId);
-                var res = _updater.Update(build);
-                string output = res.output;
-                string errors = res.errors;
-                if (!string.IsNullOrEmpty(errors) && !errors.Equals(Environment.NewLine))
-                {
-                    throw new Exception($"There was build errors:{Environment.NewLine}{res.errors}");
-                }
-
-                return output;
+                var res = _updater.Update(build, branch, commitHash);
+                _updating.RemoveAll(x => x == serverId);
+                return res;
 
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
-                throw;
-            }
-            finally
-            {
                 _updating.RemoveAll(x => x == serverId);
+                throw;
             }
 
         }

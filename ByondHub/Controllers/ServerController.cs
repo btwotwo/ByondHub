@@ -1,5 +1,4 @@
 ﻿using System;
-using ByondHub.Core.Services;
 using ByondHub.Core.Services.ServerService;
 using ByondHub.Shared.Web;
 using Microsoft.AspNetCore.Mvc;
@@ -44,15 +43,22 @@ namespace ByondHub.Controllers
         }
 
         [HttpPost("update/{serverId}")]
-        public IActionResult Update(string serverId, [FromForm] string secret)
+        public IActionResult Update(string serverId, [FromForm] string secret, [FromForm] string branch, [FromForm] string commitHash)
         {
             if (!string.Equals(secret, _secret))
             {
                 throw new Exception("Authentication error.");
             }
 
-            string res = _service.Update(serverId);
-            return Json(new SuccessResponse {Message = $"Server {serverId} is updated.", Data = res});
+            var res = _service.Update(serverId, branch, commitHash);
+
+            if (string.IsNullOrEmpty(res.ErrorMessage) || res.ErrorMessage == Environment.NewLine)
+            {
+                return Json(res);
+            }
+
+            res.Error = true;
+            return Json(res);
         }
     }
 }
