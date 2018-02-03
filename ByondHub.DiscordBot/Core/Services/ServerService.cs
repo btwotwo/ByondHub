@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Globals;
 using ByondHub.Shared.Updates;
@@ -69,12 +70,9 @@ namespace ByondHub.DiscordBot.Core.Services
 
         public async Task<UpdateResult> SendUpdateRequestAsync(string serverId, string branch, string commitHash)
         {
-            var content = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>("secret", _secret),
-                new KeyValuePair<string, string>("branch", branch),
-                new KeyValuePair<string, string>("commitHash", commitHash) 
-            });
+            var request = new UpdateRequest() {Branch = branch, CommitHash = commitHash, SecretKey = _secret};
+            HttpContent content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8,
+                "application/json");
 
             var response = await _http.PostAsync($"{ApiEndpoints.ServerUpdate}/{serverId}", content);
             string resultJson = await response.Content.ReadAsStringAsync();
