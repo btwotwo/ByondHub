@@ -46,7 +46,7 @@ namespace ByondHub.DiscordBot.Core.Services
             }
 
             var result = JsonConvert.DeserializeObject<dynamic>(resultJson);
-            return responseMessage.IsSuccessStatusCode ? result.message : result.error;
+            return responseMessage.IsSuccessStatusCode ? result.message : result.Error;
         }
 
 
@@ -65,7 +65,7 @@ namespace ByondHub.DiscordBot.Core.Services
             }
 
             var result = JsonConvert.DeserializeObject<dynamic>(resultJson);
-            return responseMessage.IsSuccessStatusCode ? result.message : result.error;
+            return responseMessage.IsSuccessStatusCode ? result.message : result.Error;
         }
 
         public async Task<UpdateResult> SendUpdateRequestAsync(string serverId, string branch, string commitHash)
