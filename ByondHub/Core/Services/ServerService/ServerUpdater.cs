@@ -28,9 +28,15 @@ namespace ByondHub.Core.Services.ServerService
             {
                 string repo = build.Path;
                 string username = build.RepositoryEmail;
-                bool upToDate = Pull(repo, username, commitHash, branch);
+                var result = Pull(repo, username, commitHash, branch);
 
-                return upToDate ? new UpdateResult {Ouput = "Server is up-to-date."} : Compile(build);
+                if (result.UpToDate)
+                {
+                    return result;
+                }
+
+                Compile(build, ref result);
+                return result;
             }
             catch (UpdateException ex)
             {
@@ -39,7 +45,7 @@ namespace ByondHub.Core.Services.ServerService
              
         }
 
-        private UpdateResult Compile(BuildModel build)
+        private void Compile(BuildModel build, ref UpdateResult result)
         {
             _logger.LogInformation($"Starting to compile {build.Id}");
             var startInfo = new ProcessStartInfo(_dreamMakerPath)
@@ -70,10 +76,11 @@ namespace ByondHub.Core.Services.ServerService
 
             _logger.LogInformation($"Finished compiling {build.Id}");
 
-            return new UpdateResult {ErrorMessage = errorOutput.ToString(), Ouput = output.ToString()};
+            result.ErrorMessage = errorOutput.ToString();
+            result.Output = output.ToString();
         }
 
-        private bool Pull(string repository, string username, string commitHash, string branchName)
+        private UpdateResult Pull(string repository, string username, string commitHash, string branchName)
         {
             _logger.LogInformation($"Updating {repository}.");
             using (var repo = new Repository(repository))
@@ -83,7 +90,14 @@ namespace ByondHub.Core.Services.ServerService
 
                 if (branch.IsCurrentRepositoryHead)
                 {
-                    return Reset(commitHash, repo, branch);
+                    bool upToDate = Reset(commitHash, repo, branch);
+                    return new UpdateResult
+                    {
+                        Branch = repo.Head.FriendlyName,
+                        CommitHash = repo.Head.Tip.Sha,
+                        CommitMessage = repo.Head.Tip.MessageShort,
+                        UpToDate = upToDate
+                    };
                 }
 
                 Commands.Checkout(repo, branch);
@@ -97,7 +111,13 @@ namespace ByondHub.Core.Services.ServerService
                 }
 
                 _logger.LogInformation($"Updated {repository}.");
-                return false;
+                return new UpdateResult
+                {
+                    Branch = repo.Head.FriendlyName,
+                    CommitHash = repo.Head.Tip.Sha,
+                    CommitMessage = repo.Head.Tip.MessageShort,
+                    UpToDate = false
+                };
             }
 
 

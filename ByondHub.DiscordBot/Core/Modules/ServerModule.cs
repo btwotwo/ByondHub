@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Services;
 using Discord;
 using Discord.Commands;
@@ -46,7 +47,18 @@ namespace ByondHub.DiscordBot.Core.Modules
                 await ReplyAsync($"Update request for \"{id}\" is finished. Got error: {updateResult.ErrorMessage}");
                 return;
             }
-            await ReplyAsync($"Update request for \"{id}\" is finished: {updateResult.Ouput}");
+
+            if (updateResult.UpToDate)
+            {
+                await ReplyAsync(
+                    $"Update request for \"{id}\" is finished." +
+                    $" Server is up-to-date on branch \"{updateResult.Branch}\" and " +
+                    $"on commit \"{updateResult.CommitHash}\" ({updateResult.CommitMessage}).");
+                return;
+            }
+
+            await ReplyAsync($"Update request for \"{id}\" is finished: {updateResult.Output}\n" +
+                             $"Server is on branch \"{updateResult.Branch}\" and on commit \"{updateResult.CommitHash}\" ({updateResult.CommitMessage}).");
         }
     }
 }

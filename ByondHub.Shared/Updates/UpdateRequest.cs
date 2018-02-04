@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ByondHub.Shared.Core;
+﻿using ByondHub.Shared.Core;
 
 namespace ByondHub.Shared.Updates
 {
