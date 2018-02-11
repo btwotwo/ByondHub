@@ -90,6 +90,19 @@ namespace ByondHub.Core.Services.ServerService
 
                 if (branch.IsCurrentRepositoryHead)
                 {
+                    var res = repo.MergeFetchedRefs(new Signature(username, username, DateTimeOffset.Now), null);
+                    if (res.Status == MergeStatus.UpToDate)
+                    {
+                        return new UpdateResult
+                        {
+                            Branch = repo.Head.FriendlyName,
+                            CommitHash = repo.Head.Tip.Sha,
+                            CommitMessage = repo.Head.Tip.MessageShort,
+                            UpToDate = true
+                        };
+                    }
+
+
                     bool upToDate = Reset(commitHash, repo, branch);
                     return new UpdateResult
                     {
