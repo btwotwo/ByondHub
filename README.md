@@ -46,7 +46,7 @@ Remember, if you start Bot you should also start Hub.
 
 Try to send some commands to Bot.
 ```
-%prefix from config%server %id% start
+@Botname server {serverId} start
 ```
 
 ## Running the tests
