@@ -86,9 +86,19 @@ namespace ByondHub.Core.Services.ServerService
             using (var repo = new Repository(repository))
             {
                 Fetch(repo);
-                var branch = repo.Branches.SingleOrDefault(x => x.FriendlyName == (branchName ?? "master")) ?? throw new UpdateException($"Branch \"{branchName}\" is not found.");
+                string remoteBranchName = $"refs/remotes/origin/{branchName ?? "master"}";
+                var remoteBranch = repo.Branches[remoteBranchName] ??
+                                   throw new UpdateException($"Error. Branch {branchName} is not found on remote.");
 
-                if (branch.IsCurrentRepositoryHead)
+                var branch = repo.Branches.SingleOrDefault(x => x.FriendlyName == branchName);
+
+                if (branch == null)
+                {
+                    branch = repo.CreateBranch(branchName, remoteBranch.Tip);
+                    repo.Branches.Update(branch, b => b.TrackedBranch = remoteBranch.CanonicalName);
+                }
+
+                if (branch.IsCurrentRepositoryHead && !branch.IsRemote)
                 {
                     var res = repo.MergeFetchedRefs(new Signature(username, username, DateTimeOffset.Now), null);
                     if (res.Status == MergeStatus.UpToDate)
@@ -101,8 +111,6 @@ namespace ByondHub.Core.Services.ServerService
                             UpToDate = true
                         };
                     }
-
-
                     bool upToDate = Reset(commitHash, repo, branch);
                     return new UpdateResult
                     {
