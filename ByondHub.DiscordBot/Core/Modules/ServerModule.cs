@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
+using ByondHub.DiscordBot.Core.Preconditions;
 using ByondHub.DiscordBot.Core.Services;
 using Discord;
 using Discord.Commands;
 
 namespace ByondHub.DiscordBot.Core.Modules
 {
-    [RequireUserPermission(GuildPermission.BanMembers)]
     [Group("server")]
+    [RequireWhitelistedRole]
     public class ServerModule : ModuleBase<SocketCommandContext>
     {
         private readonly ServerService _server;
