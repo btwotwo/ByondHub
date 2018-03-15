@@ -1,16 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace ByondHub.Core.Services.ServerLog
 {
-    public class ServerLogService : IServerLogService
+    public class ServerLogService
     {
-        public FileStream GetSaylog(DateTime date)
+        private IConfiguration _config;
+
+        public ServerLogService(IConfiguration config)
+        {
+            _config = config;
+        }
+
+        public FileStream GetSelflog(string serverName)
         {
             throw new NotImplementedException();
+            //var server = _config;
         }
 
         public FileStream GetRuntimeLog(DateTime? date = null)
