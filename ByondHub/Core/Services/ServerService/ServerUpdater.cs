@@ -101,7 +101,7 @@ namespace ByondHub.Core.Services.ServerService
                 if (branch.IsCurrentRepositoryHead)
                 {
                     var res = repo.MergeFetchedRefs(new Signature(username, username, DateTimeOffset.Now), null);
-                    if (res.Status == MergeStatus.UpToDate)
+                    if (res.Status == MergeStatus.UpToDate && string.IsNullOrEmpty(commitHash))
                     {
                         return new UpdateResult
                         {
