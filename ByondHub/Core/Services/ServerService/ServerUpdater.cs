@@ -98,10 +98,10 @@ namespace ByondHub.Core.Services.ServerService
                     repo.Branches.Update(branch, b => b.TrackedBranch = remoteBranch.CanonicalName);
                 }
 
-                if (branch.IsCurrentRepositoryHead && !branch.IsRemote)
+                if (branch.IsCurrentRepositoryHead)
                 {
                     var res = repo.MergeFetchedRefs(new Signature(username, username, DateTimeOffset.Now), null);
-                    if (res.Status == MergeStatus.UpToDate)
+                    if (res.Status == MergeStatus.UpToDate && string.IsNullOrEmpty(commitHash))
                     {
                         return new UpdateResult
                         {
@@ -111,13 +111,14 @@ namespace ByondHub.Core.Services.ServerService
                             UpToDate = true
                         };
                     }
-                    bool upToDate = Reset(commitHash, repo, branch);
+
+                    Reset(commitHash, repo, branch);
                     return new UpdateResult
                     {
                         Branch = repo.Head.FriendlyName,
                         CommitHash = repo.Head.Tip.Sha,
                         CommitMessage = repo.Head.Tip.MessageShort,
-                        UpToDate = upToDate
+                        UpToDate = false
                     };
                 }
 
@@ -156,7 +157,7 @@ namespace ByondHub.Core.Services.ServerService
             }
         }
 
-        private static bool Reset(string commitHash, Repository repository, Branch branch)
+        private static bool Reset(string commitHash, IRepository repository, Branch branch)
         {
             if (string.IsNullOrEmpty(commitHash))
             {
