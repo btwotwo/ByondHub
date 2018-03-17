@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Globals;
+using ByondHub.Shared.Logs;
 using ByondHub.Shared.Updates;
 using ByondHub.Shared.Web;
 using Microsoft.Extensions.Configuration;
@@ -82,6 +83,19 @@ namespace ByondHub.DiscordBot.Core.Services
             }
 
             var result = JsonConvert.DeserializeObject<UpdateResult>(resultJson);
+            return result;
+        }
+
+        public async Task<WorldLogResult> SendWorldLogRequestAsync(string serverId)
+        {
+            var response = await _http.GetAsync($"{ApiEndpoints.WorldLog}/{serverId}?secret={_secret}");
+            string contentType = response.Content.Headers.ContentType.MediaType;
+            if (contentType != "application/json")
+            {
+                return new WorldLogResult() {LogFileStream = await response.Content.ReadAsStreamAsync()};
+            }
+            string resultJson = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<WorldLogResult>(resultJson);
             return result;
         }
     }

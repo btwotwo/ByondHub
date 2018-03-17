@@ -2,6 +2,7 @@
 using ByondHub.DiscordBot.Core.Preconditions;
 using ByondHub.DiscordBot.Core.Services;
 using Discord.Commands;
+using Discord.Net;
 
 namespace ByondHub.DiscordBot.Core.Modules
 {
@@ -31,7 +32,7 @@ namespace ByondHub.DiscordBot.Core.Modules
 
         [Command("stop")]
         [Summary("Stops server. Provide id")]
-        public async Task StopServer([Summary("Server id")] string id)
+        public async Task StopServerAsync([Summary("Server id")] string id)
         {
             var res = await _server.SendStopRequestAsync(id);
 
@@ -46,8 +47,7 @@ namespace ByondHub.DiscordBot.Core.Modules
 
         [Command("update", RunMode = RunMode.Async)]
         [Summary("Updates server. Provide id.")]
-
-        public async Task UpdateServer([Summary("Server id")] string id,
+        public async Task UpdateServerAsync([Summary("Server id")] string id,
             [Summary("Server branch name. Optional")] string branchName = "master",
             [Summary("Server commit hash. Optional")] string commitHash = "")
         {
@@ -70,6 +70,30 @@ namespace ByondHub.DiscordBot.Core.Modules
 
             await ReplyAsync($"Update request for \"{id}\" is finished: {updateResult.Output}\n" +
                              $"Server is on branch \"{updateResult.Branch}\" and on commit \"{updateResult.CommitHash}\" ({updateResult.CommitMessage}).");
+        }
+
+        [Command("worldlog")]
+        [Summary("Gets server world.log.")]
+        public async Task GetServerWorldLogAsync([Summary("Server id")] string id)
+        {
+            try
+            {
+                var result = await _server.SendWorldLogRequestAsync(id);
+                await ReplyAsync("Check your DM.");
+                var dm = await Context.Message.Author.GetOrCreateDMChannelAsync();
+                if (result.Error)
+                {
+                    await dm.SendMessageAsync($"Server '{result.Id}' got error: {result.ErrorMessage}");
+                    return;
+                }
+
+                await dm.SendFileAsync(result.LogFileStream, $"{id}.log");
+            }
+            catch (HttpException e)
+            {
+                await ReplyAsync($"Got exception: ${e.Reason}");
+            }
+
         }
     }
 }

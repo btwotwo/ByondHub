@@ -69,7 +69,7 @@ namespace ByondHub.Controllers
                 return Json(result);
             }
 
-            return File(result.LogStream, "application/octet-stream", $"{serverId}.log");
+            return File(result.LogFileStream, "application/octet-stream", $"{serverId}.log");
         }
     }
 }

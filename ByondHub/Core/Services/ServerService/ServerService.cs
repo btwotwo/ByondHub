@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Services.ServerService.Models;
+using ByondHub.Shared.Logs;
 using ByondHub.Shared.Updates;
 using ByondHub.Shared.Web;
 using Microsoft.Extensions.Configuration;
@@ -115,7 +116,7 @@ namespace ByondHub.Core.Services.ServerService
                 }
 
                 var stream = new FileStream(path, FileMode.Open);
-                return new WorldLogResult {LogStream = stream};
+                return new WorldLogResult {LogFileStream = stream};
             }
             catch (KeyNotFoundException)
             {

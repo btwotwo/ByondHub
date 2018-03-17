@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Services.ServerService.ServerState;
 using ByondHub.Shared.Updates;
