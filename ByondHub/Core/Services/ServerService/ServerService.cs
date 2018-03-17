@@ -13,12 +13,12 @@ namespace ByondHub.Core.Services.ServerService
 {
     public class ServerService
     {
-        private readonly Dictionary<string, ServerContext> _servers;
+        private readonly Dictionary<string, Server> _servers;
         private readonly ILogger<ServerService> _logger;
 
         public ServerService(IConfiguration config, ILogger<ServerService> logger)
         {
-            _servers = new Dictionary<string, ServerContext>();
+            _servers = new Dictionary<string, Server>();
             _logger = logger;
 
             var builds = config.GetSection("Hub").GetSection("Builds").Get<BuildModel[]>();
@@ -26,7 +26,7 @@ namespace ByondHub.Core.Services.ServerService
             foreach (var build in builds)
             {
                 _servers.Add(build.Id,
-                    new ServerContext(new ServerInstance(build, config["Hub:DreamDaemonPath"], updater)));
+                    new Server(new ServerInstance(build, config["Hub:DreamDaemonPath"], updater)));
             }
         }
 

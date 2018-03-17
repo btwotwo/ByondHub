@@ -3,11 +3,11 @@ using ByondHub.Shared.Web;
 
 namespace ByondHub.Core.Services.ServerService.Models
 {
-    public class ServerContext
+    public class Server
     {
         private readonly ServerInstance _serverInstance;
 
-        public ServerContext(ServerInstance instance)
+        public Server(ServerInstance instance)
         {
             _serverInstance = instance;
         }
