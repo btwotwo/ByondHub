@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Preconditions;
 using ByondHub.DiscordBot.Core.Services;
-using Discord;
 using Discord.Commands;
 
 namespace ByondHub.DiscordBot.Core.Modules
@@ -22,16 +20,28 @@ namespace ByondHub.DiscordBot.Core.Modules
         [Summary("Starts server. Provide id and port.")]
         public async Task StartServerAsync([Summary("Server id")] string id, [Summary("Port to start")] int port)
         {
-            string res = await _server.SendStartRequestAsync(id, port);
-            await ReplyAsync(res);
+            var res = await _server.SendStartRequestAsync(id, port);
+            if (res.Error)
+            {
+                await ReplyAsync($"Server '{res.Id}' error: {res.ErrorMessage}");
+                return;
+            }
+            await ReplyAsync($"Server '{res.Id}': {res.Message} Port: {res.Port}");
         }
 
         [Command("stop")]
         [Summary("Stops server. Provide id")]
         public async Task StopServer([Summary("Server id")] string id)
         {
-            string res = await _server.SendStopRequestAsync(id);
-            await ReplyAsync(res);
+            var res = await _server.SendStopRequestAsync(id);
+
+            if (res.Error)
+            {
+                await ReplyAsync($"Server '{res.Id}' error: {res.ErrorMessage}");
+                return;
+            }
+
+            await ReplyAsync($"Server '{res.Id}': {res.Message}");
         }
 
         [Command("update", RunMode = RunMode.Async)]

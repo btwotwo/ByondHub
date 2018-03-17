@@ -29,14 +29,13 @@ namespace ByondHub.DiscordBot.Core.Services
             };
         }
 
-        public async Task<string> SendStartRequestAsync(string serverId, int port)
+        public async Task<ServerStartStopResult> SendStartRequestAsync(string serverId, int port)
         {
             var content = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("port", port.ToString()),
                 new KeyValuePair<string, string>("secret", _secret)
             });
-
             var responseMessage = await _http.PostAsync($"{ApiEndpoints.ServerStart}/{serverId}", content);
             string resultJson = await responseMessage.Content.ReadAsStringAsync();
 
@@ -45,12 +44,12 @@ namespace ByondHub.DiscordBot.Core.Services
                 throw new Exception($"Got {responseMessage.StatusCode} code.");
             }
 
-            var result = JsonConvert.DeserializeObject<dynamic>(resultJson);
-            return responseMessage.IsSuccessStatusCode ? result.message : result.Error;
+            var result = JsonConvert.DeserializeObject<ServerStartStopResult>(resultJson);
+            return result;
         }
 
 
-        public async Task<string> SendStopRequestAsync(string serverId)
+        public async Task<ServerStartStopResult> SendStopRequestAsync(string serverId)
         {
             var content = new FormUrlEncodedContent(new[]
             {
@@ -64,8 +63,8 @@ namespace ByondHub.DiscordBot.Core.Services
                 throw new Exception($"Got {responseMessage.StatusCode} code.");
             }
 
-            var result = JsonConvert.DeserializeObject<dynamic>(resultJson);
-            return responseMessage.IsSuccessStatusCode ? result.message : result.Error;
+            var result = JsonConvert.DeserializeObject<ServerStartStopResult>(resultJson);
+            return result;
         }
 
         public async Task<UpdateResult> SendUpdateRequestAsync(string serverId, string branch, string commitHash)

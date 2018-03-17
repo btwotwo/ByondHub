@@ -28,8 +28,8 @@ namespace ByondHub.Controllers
                 throw new Exception("Authentication error.");
             }
 
-            _service.Start(serverId, port);
-            return Json(new SuccessResponse{Message = $"Started \"{serverId}\" on port \"{port}\"."});
+            var result = _service.Start(serverId, port);
+            return Json(result);
         }
 
         [HttpPost("stop/{serverId}")]
@@ -39,8 +39,8 @@ namespace ByondHub.Controllers
             {
                 throw new Exception("Authentication error.");
             }
-            _service.Stop(serverId);
-            return Json(new SuccessResponse{Message = $"Stopped server with id \"{serverId}\""});
+            var result = _service.Stop(serverId);
+            return Json(result);
         }
 
         [HttpPost("update/{serverId}")]
@@ -51,14 +51,7 @@ namespace ByondHub.Controllers
                 throw new Exception("Authentication error.");
             }
 
-            var res = _service.Update(serverId, request.Branch, request.CommitHash);
-
-            if (string.IsNullOrEmpty(res.ErrorMessage) || res.ErrorMessage == Environment.NewLine)
-            {
-                return Json(res);
-            }
-
-            res.Error = true;
+            var res = _service.Update(request);
             return Json(res);
         }
     }
