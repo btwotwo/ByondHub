@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Security.Authentication;
 using ByondHub.Core.Services.ServerService;
 using ByondHub.Shared.Updates;
-using ByondHub.Shared.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace ByondHub.Controllers
 {
-    [Produces("application/json")]
+    [Produces("application/json", "application/octet-stream")]
     [Route("api/[controller]")]
     public class ServerController : Controller
     {
@@ -53,6 +53,23 @@ namespace ByondHub.Controllers
 
             var res = _service.Update(request);
             return Json(res);
+        }
+
+        [HttpGet("worldLog/{serverId}")]
+        public IActionResult GetWorldLog(string serverId, [FromQuery] string secret)
+        {
+            if (!string.Equals(secret, _secret))
+            {
+                throw new AuthenticationException("Authentication error.");
+            }
+
+            var result = _service.GetWorldLog(serverId);
+            if (result.Error)
+            {
+                return Json(result);
+            }
+
+            return File(result.LogStream, "application/octet-stream", $"{serverId}.log");
         }
     }
 }

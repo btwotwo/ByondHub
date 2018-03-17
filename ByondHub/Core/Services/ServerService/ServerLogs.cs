@@ -5,11 +5,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace ByondHub.Core.Services.ServerLog
 {
-    public class ServerLogService
+    public class ServerLogs
     {
         private IConfiguration _config;
 
-        public ServerLogService(IConfiguration config)
+        public ServerLogs(IConfiguration config)
         {
             _config = config;
         }
@@ -20,7 +20,7 @@ namespace ByondHub.Core.Services.ServerLog
             //var server = _config;
         }
 
-        public FileStream GetRuntimeLog(DateTime? date = null)
+        public FileStream GetWorldLog(string serverId)
         {
             throw new NotImplementedException();
         }

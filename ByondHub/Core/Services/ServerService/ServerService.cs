@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Services.ServerService.Models;
 using ByondHub.Shared.Updates;
@@ -45,7 +44,7 @@ namespace ByondHub.Core.Services.ServerService
             }
             catch (Exception e)
             {
-                return new ServerStartStopResult()
+                return new ServerStartStopResult
                 {
                     Error = true,
                     Id = serverId,
@@ -88,11 +87,11 @@ namespace ByondHub.Core.Services.ServerService
             }
             catch (KeyNotFoundException)
             {
-                return new UpdateResult() {Error = true, Id = request.Id, ErrorMessage = "Server not found."};
+                return new UpdateResult {Error = true, Id = request.Id, ErrorMessage = "Server not found."};
             }
             catch (Exception e)
             {
-                return new UpdateResult()
+                return new UpdateResult
                 {
                     Error = true,
                     Id = request.Id,
@@ -100,6 +99,32 @@ namespace ByondHub.Core.Services.ServerService
                 };
             }
 
+        }
+
+        public WorldLogResult GetWorldLog(string serverId)
+        {
+            try
+            {
+                var server = _servers[serverId];
+                string path = Path.Combine(server.Build.Path, $"{server.Build.ExecutableName}.log");
+
+                bool fileExists = File.Exists(path);
+                if (!fileExists)
+                {
+                    return new WorldLogResult {Error = true, ErrorMessage = "World Log not found.", Id = serverId};
+                }
+
+                var stream = new FileStream(path, FileMode.Open);
+                return new WorldLogResult {LogStream = stream};
+            }
+            catch (KeyNotFoundException)
+            {
+                return new WorldLogResult {Error = true, ErrorMessage = "Server not found.", Id = serverId};
+            }
+            catch (Exception e)
+            {
+                return new WorldLogResult {Error = true, ErrorMessage = $"Got exception: {e.Message}", Id = serverId};
+            }
         }
     }
 }

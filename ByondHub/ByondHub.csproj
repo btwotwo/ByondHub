@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Folder Include="Core\Models\" />
+    <Folder Include="Core\Services\ServerLog\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

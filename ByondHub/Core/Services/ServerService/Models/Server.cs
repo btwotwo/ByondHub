@@ -1,4 +1,5 @@
-﻿using ByondHub.Shared.Updates;
+﻿using ByondHub.Core.Configuration;
+using ByondHub.Shared.Updates;
 using ByondHub.Shared.Web;
 
 namespace ByondHub.Core.Services.ServerService.Models
@@ -11,6 +12,8 @@ namespace ByondHub.Core.Services.ServerService.Models
         {
             _serverInstance = instance;
         }
+
+        public BuildModel Build => _serverInstance.Build;
 
         public ServerStartStopResult Start(int port)
         {
