@@ -69,7 +69,7 @@ namespace ByondHub.DiscordBot.Core.Services
 
         public async Task<UpdateResult> SendUpdateRequestAsync(string serverId, string branch, string commitHash)
         {
-            var request = new UpdateRequest() {Branch = branch, CommitHash = commitHash, SecretKey = _secret};
+            var request = new UpdateRequest() {Branch = branch, CommitHash = commitHash, SecretKey = _secret, Id = serverId};
             HttpContent content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8,
                 "application/json");
 
