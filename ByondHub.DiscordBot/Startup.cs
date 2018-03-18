@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -82,10 +83,13 @@ namespace ByondHub.DiscordBot
             if (msg.Author.Id == _client.CurrentUser.Id) return;
 
             int argPos = 0;
-            bool hasStringPrefix = message.HasStringPrefix(Configuration["Bot:Prefix"], ref argPos);
+            string prefix = Configuration["Bot:Prefix"];
+            bool hasStringPrefix;
+            hasStringPrefix = !string.IsNullOrEmpty(prefix) &&
+                              message.HasStringPrefix(prefix, ref argPos);
             bool hasMentionPrefix = message.HasMentionPrefix(_client.CurrentUser, ref argPos);
 
-            if(!hasMentionPrefix && !hasStringPrefix)
+            if (!hasMentionPrefix && !hasStringPrefix)
             {
                 return;
             }
@@ -95,13 +99,15 @@ namespace ByondHub.DiscordBot
 
             if (!result.IsSuccess)
             {
-#if DEBUG
-                await context.Channel.SendMessageAsync(result.ErrorReason);
-#endif
+                if (Debugger.IsAttached)
+                {
+                    await context.Channel.SendMessageAsync(result.ErrorReason);
+                }
                 _logger.LogError(result.ErrorReason);
             }
 
         }
+
         private Task Log(LogMessage message)
         {
             switch (message.Severity)

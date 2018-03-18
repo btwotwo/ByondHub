@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Security.Authentication;
 using ByondHub.Core.Services.ServerService;
 using ByondHub.Shared.Updates;
-using ByondHub.Shared.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace ByondHub.Controllers
 {
-    [Produces("application/json")]
+    [Produces("application/json", "application/octet-stream")]
     [Route("api/[controller]")]
     public class ServerController : Controller
     {
@@ -28,8 +28,8 @@ namespace ByondHub.Controllers
                 throw new Exception("Authentication error.");
             }
 
-            _service.Start(serverId, port);
-            return Json(new SuccessResponse{Message = $"Started \"{serverId}\" on port \"{port}\"."});
+            var result = _service.Start(serverId, port);
+            return Json(result);
         }
 
         [HttpPost("stop/{serverId}")]
@@ -39,8 +39,8 @@ namespace ByondHub.Controllers
             {
                 throw new Exception("Authentication error.");
             }
-            _service.Stop(serverId);
-            return Json(new SuccessResponse{Message = $"Stopped server with id \"{serverId}\""});
+            var result = _service.Stop(serverId);
+            return Json(result);
         }
 
         [HttpPost("update/{serverId}")]
@@ -51,15 +51,25 @@ namespace ByondHub.Controllers
                 throw new Exception("Authentication error.");
             }
 
-            var res = _service.Update(serverId, request.Branch, request.CommitHash);
+            var res = _service.Update(request);
+            return Json(res);
+        }
 
-            if (string.IsNullOrEmpty(res.ErrorMessage) || res.ErrorMessage == Environment.NewLine)
+        [HttpGet("worldLog/{serverId}")]
+        public IActionResult GetWorldLog(string serverId, [FromQuery] string secret)
+        {
+            if (!string.Equals(secret, _secret))
             {
-                return Json(res);
+                throw new AuthenticationException("Authentication error.");
             }
 
-            res.Error = true;
-            return Json(res);
+            var result = _service.GetWorldLog(serverId);
+            if (result.Error)
+            {
+                return Json(result);
+            }
+
+            return File(result.LogFileStream, "application/octet-stream", $"{serverId}.log");
         }
     }
 }

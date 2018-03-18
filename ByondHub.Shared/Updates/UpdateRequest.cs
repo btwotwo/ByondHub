@@ -6,5 +6,6 @@ namespace ByondHub.Shared.Updates
     {
         public string Branch { get; set; }
         public string CommitHash { get; set; }
+        public string Id { get; set; }
     }
 }
