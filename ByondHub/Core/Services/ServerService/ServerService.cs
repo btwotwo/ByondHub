@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using ByondHub.Core.Configuration;
-using ByondHub.Core.Models;
+using ByondHub.Core.Services.ServerService.Models;
+using ByondHub.Shared.Logs;
 using ByondHub.Shared.Updates;
+using ByondHub.Shared.Web;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -12,100 +13,119 @@ namespace ByondHub.Core.Services.ServerService
 {
     public class ServerService
     {
-        private readonly Dictionary<string, ServerInstance> _servers;
-        private readonly IConfiguration _config;
+        private readonly Dictionary<string, Server> _servers;
         private readonly ILogger<ServerService> _logger;
-        private readonly BuildModel[] _builds;
-        private readonly ServerUpdater _updater;
-        private readonly List<string> _updating;
 
         public ServerService(IConfiguration config, ILogger<ServerService> logger)
         {
-            _servers = new Dictionary<string, ServerInstance>();
-            _config = config;
+            _servers = new Dictionary<string, Server>();
             _logger = logger;
-            _builds = _config.GetSection("Hub").GetSection("Builds").Get<BuildModel[]>();
-            _updater = new ServerUpdater(config, logger);
-            _updating = new List<string>();
+
+            var builds = config.GetSection("Hub").GetSection("Builds").Get<BuildModel[]>();
+            var updater = new ServerUpdater(config, logger);
+            foreach (var build in builds)
+            {
+                _servers.Add(build.Id,
+                    new Server(new ServerInstance(build, config["Hub:DreamDaemonPath"], updater)));
+            }
         }
 
-        public void Start(string serverId, int port)
-        {
-            if (_servers.ContainsKey(serverId))
-            {
-                throw new Exception($"Server with id \"{serverId}\" is already started.");
-            }
-            var build = _builds.FirstOrDefault(x => x.Id == serverId);
-            if (build == null)
-            {
-                throw new Exception($"Server with id \"{serverId}\" is not found.");
-            }
-
-            var server = new ServerInstance(build, _config["Hub:DreamDaemonPath"], port);
-            _servers.Add(serverId, server);
-            server.Start();
-            _logger.LogInformation($"Starting server with id {serverId}, port: {port}");
-        }
-
-        public void Stop(string serverId)
-        {
-            if (!_servers.ContainsKey(serverId))
-            {
-                throw new Exception($"Server with id {serverId} is not started");
-            }
-
-            var server = _servers[serverId];
-            server.Stop();
-
-            _servers.Remove(serverId);
-            _logger.LogInformation($"Killed server with id {serverId}.");
-        }
-
-        public UpdateResult Update(string serverId, string branch, string commitHash)
+        public ServerStartStopResult Start(string serverId, int port)
         {
             try
             {
-                if (_updating.Contains(serverId))
-                {
-                    return new UpdateResult
-                    {
-                        Error = true,
-                        ErrorMessage =
-                            $"Server with id \"{serverId}\" is already updating. Please wait until update process is finished."
-                    };  
-                }
+                var server = _servers[serverId];
 
-                var build = _builds.SingleOrDefault(x => x.Id == serverId);
-                if (build == null)
-                {
-                    return new UpdateResult
-                    {
-                        Error = true,
-                        ErrorMessage = $"Server with id \"{serverId}\" is not found."
-                    };
-                }
-                if (_servers.ContainsKey(serverId))
-                {
-                    return new UpdateResult()
-                    {
-                        Error = true,
-                        ErrorMessage = $"Server with id \"{serverId}\" is started. Please stop it first."
-                    };
-                }
-
-                _updating.Add(serverId);
-                var res = _updater.Update(build, branch, commitHash);
-                _updating.RemoveAll(x => x == serverId);
-                return res;
-
+                _logger.LogInformation($"Starting server with id {serverId}, port: {port}");
+                return server.Start(port);
+            }
+            catch (KeyNotFoundException)
+            {
+                return new ServerStartStopResult {Error = true, Id = serverId, ErrorMessage = "Server not found."};
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
-                _updating.RemoveAll(x => x == serverId);
-                throw;
+                return new ServerStartStopResult
+                {
+                    Error = true,
+                    Id = serverId,
+                    ErrorMessage = $"Got following exception: {e.Message}"
+                };
             }
 
+
+        }
+
+        public ServerStartStopResult Stop(string serverId)
+        {
+            try
+            {
+                var server = _servers[serverId];
+                _logger.LogInformation($"Killing server with id {serverId}.");
+                return server.Stop();
+            }
+            catch (KeyNotFoundException)
+            {
+                return new ServerStartStopResult {Error = true, Id = serverId, ErrorMessage = "Server not found."};
+            }
+            catch (Exception e)
+            {
+                return new ServerStartStopResult
+                {
+                    Error = true,
+                    Id = serverId,
+                    ErrorMessage = $"Got following exception: {e.Message}"
+                };
+            }
+        }
+
+        public UpdateResult Update(UpdateRequest request)
+        {
+            try
+            {
+                var server = _servers[request.Id];
+                return server.Update(request);
+            }
+            catch (KeyNotFoundException)
+            {
+                return new UpdateResult {Error = true, Id = request.Id, ErrorMessage = "Server not found."};
+            }
+            catch (Exception e)
+            {
+                return new UpdateResult
+                {
+                    Error = true,
+                    Id = request.Id,
+                    ErrorMessage = $"Got exception: {e.Message}"
+                };
+            }
+
+        }
+
+        public WorldLogResult GetWorldLog(string serverId)
+        {
+            try
+            {
+                var server = _servers[serverId];
+                string path = Path.Combine(server.Build.Path, $"{server.Build.ExecutableName}.log");
+
+                bool fileExists = File.Exists(path);
+                if (!fileExists)
+                {
+                    return new WorldLogResult {Error = true, ErrorMessage = "World Log not found.", Id = serverId};
+                }
+
+                var stream = new FileStream(path, FileMode.Open);
+                return new WorldLogResult {LogFileStream = stream};
+            }
+            catch (KeyNotFoundException)
+            {
+                return new WorldLogResult {Error = true, ErrorMessage = "Server not found.", Id = serverId};
+            }
+            catch (Exception e)
+            {
+                return new WorldLogResult {Error = true, ErrorMessage = $"Got exception: {e.Message}", Id = serverId};
+            }
         }
     }
 }

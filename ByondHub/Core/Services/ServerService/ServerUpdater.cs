@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using ByondHub.Core.Configuration;
+using ByondHub.Core.Services.ServerService.Models;
 using ByondHub.Shared.Updates;
 using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
