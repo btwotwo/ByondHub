@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Services.ServerService.ServerState;
 using ByondHub.Shared.Updates;
 using ByondHub.Shared.Web;
+using Microsoft.Extensions.Logging;
 
 namespace ByondHub.Core.Services.ServerService.Models
 {
@@ -11,47 +13,64 @@ namespace ByondHub.Core.Services.ServerService.Models
         private Process _process;
         private readonly string _dreamDaemonPath;
         private readonly ServerUpdater _updater;
+        private ILogger _logger;
 
         public IServerState State { get; set; }
         public BuildModel Build { get; }
         public bool IsRunning => !_process.HasExited;
 
-        public ServerInstance(BuildModel build, string dreamDaemonPath, ServerUpdater updater)
+        public ServerInstance(BuildModel build, string dreamDaemonPath, ServerUpdater updater, ILogger logger)
         {
             Build = build;
             State = new StoppedServerState();
             _dreamDaemonPath = dreamDaemonPath;
             _updater = updater;
+            _logger = logger;
         }
 
         public ServerStartStopResult Start(int port)
         {
-            var info = new ProcessStartInfo($"{_dreamDaemonPath}")
+            try
             {
-                Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself",
-                CreateNoWindow = true,
-                UseShellExecute = true
-            };
-            _process = new Process {StartInfo = info};
-            bool started = _process.Start();
-            if (!started)
+                var info = new ProcessStartInfo($"{_dreamDaemonPath}")
+                {
+                    Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself",
+                    CreateNoWindow = true,
+                    UseShellExecute = true
+                };
+                _process = new Process {StartInfo = info};
+                bool started = _process.Start();
+                _process.Exited += (sender, args) => State = new StoppedServerState();
+                if (!started || _process.HasExited)
+                {
+                    State = new StoppedServerState();
+                    return new ServerStartStopResult
+                    {
+                        Error = true,
+                        ErrorMessage = "Failed to start server.",
+                        Id = Build.Id
+                    };
+                }
+                State = new StartedServerState();
+                return new ServerStartStopResult()
+                {
+                    Message = "Started server.",
+                    Id = Build.Id,
+                    Port = port
+                };
+            }
+            catch (Exception ex)
             {
                 State = new StoppedServerState();
-                return new ServerStartStopResult
+                _logger.LogError(ex, $"Error starting server. Id: {Build.Id}");
+                return new ServerStartStopResult()
                 {
                     Error = true,
-                    ErrorMessage = "Failed to start server.",
+                    ErrorMessage = $"Failed to start server. Exception: {ex.Message}",
                     Id = Build.Id
                 };
             }
-            _process.Exited += (sender, args) => State = new StoppedServerState();
-            State = new StartedServerState();
-            return new ServerStartStopResult()
-            {
-                Message = "Started server.",
-                Id = Build.Id,
-                Port = port
-            };
+            
         }
 
         public ServerStartStopResult Stop()
