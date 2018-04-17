@@ -43,6 +43,11 @@ namespace ByondHub.Core.Services.ServerService
                 _logger.LogError(ex, "Error while updating.");
                 return new UpdateResult {Error = true, ErrorMessage = ex.Message};
             }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Failed to update.");
+                return new UpdateResult{Error = true, ErrorMessage = ex.Message};
+            }
              
         }
 
