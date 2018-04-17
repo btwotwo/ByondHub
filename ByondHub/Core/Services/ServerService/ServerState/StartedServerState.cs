@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using ByondHub.Core.Services.ServerService.Models;
 using ByondHub.Shared.Updates;
 using ByondHub.Shared.Web;
@@ -30,6 +31,12 @@ namespace ByondHub.Core.Services.ServerService.ServerState
         public ServerStartStopResult Stop(ServerInstance server)
         {
            return server.Stop();
+        }
+
+        public async Task<ServerStatusResult> GetStatusAsync(ServerInstance server)
+        {
+            await server.UpdateStatusAsync();
+            return server.Status;
         }
     }
 }

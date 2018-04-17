@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Services.ServerService.Models;
 using ByondHub.Shared.Logs;
@@ -125,6 +126,23 @@ namespace ByondHub.Core.Services.ServerService
             catch (Exception e)
             {
                 return new WorldLogResult {Error = true, ErrorMessage = $"Got exception: {e.Message}", Id = serverId};
+            }
+        }
+
+        public async Task<ServerStatusResult> GetStatus(string serverId)
+        {
+            try
+            {
+                var server = _servers[serverId];
+                return await server.GetStatusAsync();
+            }
+            catch (KeyNotFoundException)
+            {
+                return new ServerStatusResult() {Error = true, ErrorMessage = $"{serverId} not found."};
+            }
+            catch (Exception e)
+            {
+                return new ServerStatusResult() {Error = true, ErrorMessage = $"Error: {e}"};
             }
         }
     }

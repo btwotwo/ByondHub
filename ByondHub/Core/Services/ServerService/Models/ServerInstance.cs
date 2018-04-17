@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Services.ServerService.ServerState;
 using ByondHub.Shared.Updates;
@@ -16,10 +17,13 @@ namespace ByondHub.Core.Services.ServerService.Models
         public BuildModel Build { get; }
         public bool IsRunning => !_process.HasExited;
 
-        public ServerInstance(BuildModel build, string dreamDaemonPath, ServerUpdater updater)
+        public ServerStatusResult Status { get; private set; }
+
+        public ServerInstance(BuildModel build, string dreamDaemonPath, ServerUpdater updater, string serverAddress)
         {
             Build = build;
             State = new StoppedServerState();
+            Status = new ServerStatusResult() { IsRunning = false, IsUpdating = false, Address = serverAddress };
             _dreamDaemonPath = dreamDaemonPath;
             _updater = updater;
         }
@@ -46,6 +50,9 @@ namespace ByondHub.Core.Services.ServerService.Models
             }
             _process.Exited += (sender, args) => State = new StoppedServerState();
             State = new StartedServerState();
+            Status.IsRunning = true;
+            Status.IsUpdating = false;
+            Status.Address = $"{Status.Address}:{port}";
             return new ServerStartStopResult()
             {
                 Message = "Started server.",
@@ -59,6 +66,7 @@ namespace ByondHub.Core.Services.ServerService.Models
             _process.Kill();
             _process.Dispose();
             State = new StoppedServerState();
+            Status.IsRunning = false;
             return new ServerStartStopResult {Id = Build.Id, Message = "Server stopped."};
         }
 
@@ -67,13 +75,20 @@ namespace ByondHub.Core.Services.ServerService.Models
             try
             {
                 State = new UpdatingServerState();
+                Status.IsUpdating = true;
                 var result = _updater.Update(Build, request.Branch, request.CommitHash);
                 return result;
             }
             finally
             {
                 State = new StoppedServerState();
+                Status.IsUpdating = false;
             }
+        }
+
+        public async Task UpdateStatusAsync()
+        {
+            Status.Players++;
         }
     }
 }

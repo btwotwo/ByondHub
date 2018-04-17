@@ -25,7 +25,7 @@ namespace ByondHub.Controllers
         {
             if (!string.Equals(secret, _secret))
             {
-                throw new Exception("Authentication error.");
+                throw new Exception("Authentication error."); // again, all of these are temporary
             }
 
             var result = _service.Start(serverId, port);
@@ -70,6 +70,16 @@ namespace ByondHub.Controllers
             }
 
             return File(result.LogFileStream, "application/octet-stream", $"{serverId}.log");
+        }
+
+        public IActionResult GetServerStatus(string serverId, [FromQuery] string secret)
+        {
+            if (!string.Equals(secret, _secret))
+            {
+                throw new AuthenticationException("Authentication error."); 
+            }
+
+            return _service.
         }
     }
 }
