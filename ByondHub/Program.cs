@@ -26,7 +26,6 @@ namespace ByondHub
                 .ConfigureLogging((hostingContext, logging) =>
                 {
                     logging.AddConsole();
-                    logging.AddDebug();
                 })
                 .Build();
         }

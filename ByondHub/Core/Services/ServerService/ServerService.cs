@@ -27,7 +27,7 @@ namespace ByondHub.Core.Services.ServerService
             foreach (var build in builds)
             {
                 _servers.Add(build.Id,
-                    new Server(new ServerInstance(build, config["Hub:DreamDaemonPath"], updater)));
+                    new Server(new ServerInstance(build, config["Hub:DreamDaemonPath"], updater, logger)));
             }
         }
 
