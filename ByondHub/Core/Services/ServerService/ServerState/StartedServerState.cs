@@ -6,37 +6,51 @@ using ByondHub.Shared.Web;
 
 namespace ByondHub.Core.Services.ServerService.ServerState
 {
-    public class StartedServerState : IServerState
+    public class StartedServerState : ServerStateAbstract
     {
-        public UpdateResult Update(ServerInstance server, UpdateRequest request)
+
+        public StartedServerState(ServerInstance server) : base(server)
+        {
+        }
+
+        public override UpdateResult Update(UpdateRequest request)
         {
             return new UpdateResult
             {
-                Id = server.Build.Id,
+                Id = Server.Build.Id,
                 Error = true,
-                ErrorMessage = $"Server '{server.Build.Id}' is running. Please stop it first."
+                ErrorMessage = $"Server '{Server.Build.Id}' is running. Please stop it first."
             };
         }
 
-        public ServerStartStopResult Start(ServerInstance server, int port)
+        public override ServerStartStopResult Start(int port)
         {
             return new ServerStartStopResult
             {
                 Error = true,
                 ErrorMessage = "Server is already started.",
-                Id = server.Build.Id
+                Id = Server.Build.Id
             };
         }
 
-        public ServerStartStopResult Stop(ServerInstance server)
+        public override ServerStartStopResult Stop()
         {
-           return server.Stop();
+            var result = Server.Stop();
+            if (result.Error) return result;
+
+            Server.State = new StoppedServerState(Server);
+            Server.State.UpdateStatus();
+            return result;
         }
 
-        public async Task<ServerStatusResult> GetStatusAsync(ServerInstance server)
+        public override async Task UpdatePlayersAsync()
         {
-            await server.UpdateStatusAsync();
-            return server.Status;
+            await Server.UpdatePlayersAsync();
+        }
+
+        public override void UpdateStatus()
+        {
+            Server.Status.SetStarted();
         }
     }
 }

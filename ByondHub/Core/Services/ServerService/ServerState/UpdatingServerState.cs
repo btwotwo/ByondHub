@@ -7,36 +7,50 @@ using ByondHub.Shared.Web;
 
 namespace ByondHub.Core.Services.ServerService.ServerState
 {
-    public class UpdatingServerState : IServerState
+    public class UpdatingServerState : ServerStateAbstract
     {
-        public UpdateResult Update(ServerInstance server, UpdateRequest request)
+        public UpdatingServerState(ServerInstance server) : base(server)
+        {
+        }
+
+        public override UpdateResult Update(UpdateRequest request)
         {
             return new UpdateResult
             {
                 Error = true,
-                ErrorMessage = $"Server with '{server.Build.Id} is already updating.",
-                Id = server.Build.Id
+                ErrorMessage = $"Server with '{Server.Build.Id} is already updating.",
+                Id = Server.Build.Id
             };
         }
 
-        public ServerStartStopResult Start(ServerInstance server, int port)
+        public override ServerStartStopResult Start(int port)
         {
             return new ServerStartStopResult()
             {
                 Error = true,
                 ErrorMessage = "Server is updating. Please wait until update process is finished.",
-                Id = server.Build.Id
+                Id = Server.Build.Id
             };
         }
 
-        public ServerStartStopResult Stop(ServerInstance server)
+        public override ServerStartStopResult Stop()
         {
             return new ServerStartStopResult()
             {
                 Error = true,
                 ErrorMessage = "Server is updating. Wait until update process is finished.",
-                Id = server.Build.Id
+                Id = Server.Build.Id
             };
+        }
+
+        public override Task UpdatePlayersAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override void UpdateStatus()
+        {
+            Server.Status.SetUpdating();
         }
     }
 }

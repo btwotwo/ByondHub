@@ -11,5 +11,31 @@ namespace ByondHub.Shared.Web
         public bool IsUpdating { get; set; }
         public int Admins { get; set; }
         public int Players { get; set; }
+        public int Port { get; set; }
+
+
+        public void SetStarted()
+        {
+            IsRunning = true;
+            IsUpdating = false;
+            Players = 0;
+            Admins = 0;
+        }
+
+        public void SetStopped()
+        {
+            IsRunning = false;
+            IsUpdating = false;
+            Players = 0;
+            Admins = 0;
+        }
+
+        public void SetUpdating()
+        {
+            IsRunning = false;
+            IsUpdating = false;
+            Players = 0;
+            Admins = 0;
+        }
     }
 }

@@ -14,18 +14,18 @@ namespace ByondHub.Core.Services.ServerService.Models
         private Process _process;
         private readonly string _dreamDaemonPath;
         private readonly ServerUpdater _updater;
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
-        public IServerState State { get; set; }
+        public ServerStateAbstract State { get; set; }
         public BuildModel Build { get; }
         public bool IsRunning => !_process.HasExited;
 
-        public ServerStatusResult Status { get; private set; }
+        public ServerStatusResult Status { get; }
 
         public ServerInstance(BuildModel build, string dreamDaemonPath, ServerUpdater updater, string serverAddress, ILogger logger)
         {
             Build = build;
-            State = new StoppedServerState();
+            State = new StoppedServerState(this);
             Status = new ServerStatusResult() { IsRunning = false, IsUpdating = false, Address = serverAddress };
             _dreamDaemonPath = dreamDaemonPath;
             _updater = updater;
@@ -43,11 +43,11 @@ namespace ByondHub.Core.Services.ServerService.Models
                     UseShellExecute = true
                 };
                 _process = new Process {StartInfo = info};
-                bool started = _process.Start();
-                _process.Exited += (sender, args) => State = new StoppedServerState();
-                if (!started || _process.HasExited)
+                _process.Start();
+                _process.Exited += HandleUnexpectedExit;
+
+                if (_process.HasExited)
                 {
-                    State = new StoppedServerState();
                     return new ServerStartStopResult
                     {
                         Error = true,
@@ -55,11 +55,9 @@ namespace ByondHub.Core.Services.ServerService.Models
                         Id = Build.Id
                     };
                 }
-                State = new StartedServerState();
-                _process.Exited += (sender, args) => State = new StoppedServerState();
-                Status.IsRunning = true;
-                Status.IsUpdating = false;
-                Status.Address = $"{Status.Address}:{port}";
+
+                Status.Port = port;
+
                 return new ServerStartStopResult()
                 {
                     Message = "Started server.",
@@ -71,7 +69,6 @@ namespace ByondHub.Core.Services.ServerService.Models
             }
             catch (Exception ex)
             {
-                State = new StoppedServerState();
                 _logger.LogError(ex, $"Error starting server. Id: {Build.Id}");
                 return new ServerStartStopResult()
                 {
@@ -83,34 +80,32 @@ namespace ByondHub.Core.Services.ServerService.Models
             
         }
 
+
         public ServerStartStopResult Stop()
         {
+            _process.Exited -= HandleUnexpectedExit;
             _process.Kill();
             _process.Dispose();
-            State = new StoppedServerState();
-            Status.IsRunning = false;
             return new ServerStartStopResult {Id = Build.Id, Message = "Server stopped."};
         }
 
         public UpdateResult Update(UpdateRequest request)
         {
-            try
-            {
-                State = new UpdatingServerState();
-                Status.IsUpdating = true;
-                var result = _updater.Update(Build, request.Branch, request.CommitHash);
-                return result;
-            }
-            finally
-            {
-                State = new StoppedServerState();
-                Status.IsUpdating = false;
-            }
+            var result = _updater.Update(Build, request.Branch, request.CommitHash);
+            return result;
         }
 
-        public async Task UpdateStatusAsync()
+        public async Task UpdatePlayersAsync()
         {
             Status.Players++;
+        }
+
+        private void HandleUnexpectedExit(object sender, EventArgs args)
+        {
+            State = new StoppedServerState(this);
+            State.UpdateStatus();
+            _logger.LogWarning($"Server with id ${Build.Id} unexpectedly stopped. Exit code: ${_process.ExitCode}");
+            _process.Dispose();
         }
     }
 }

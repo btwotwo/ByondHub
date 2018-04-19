@@ -6,26 +6,50 @@ using ByondHub.Shared.Web;
 
 namespace ByondHub.Core.Services.ServerService.ServerState
 {
-    public class StoppedServerState : IServerState
+    public class StoppedServerState : ServerStateAbstract
     {
-        public UpdateResult Update(ServerInstance server, UpdateRequest request)
+        public StoppedServerState(ServerInstance server) : base(server)
         {
-            return server.Update(request);
         }
 
-        public ServerStartStopResult Start(ServerInstance server, int port)
+        public override UpdateResult Update(UpdateRequest request)
         {
-            return server.Start(port);
+            Server.State = new UpdatingServerState(Server);
+            var result = Server.Update(request);
+            Server.State = new StoppedServerState(Server);
+            return result;
         }
 
-        public ServerStartStopResult Stop(ServerInstance server)
+        public override ServerStartStopResult Start(int port)
+        {
+            var result = Server.Start(port);
+            if (result.Error) return result;
+
+            Server.State = new StartedServerState(Server);
+            Server.State.UpdateStatus();
+            return result;
+        }
+
+        public override ServerStartStopResult Stop()
         {
             return new ServerStartStopResult
             {
                 Error = true,
                 ErrorMessage = "Server is not running.",
-                Id = server.Build.Id
+                Id = Server.Build.Id
             };
         }
+
+        public override Task UpdatePlayersAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override void UpdateStatus()
+        {
+            Server.Status.SetStopped();
+        }
+
+
     }
 }
