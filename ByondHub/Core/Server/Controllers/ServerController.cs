@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Security.Authentication;
-using ByondHub.Core.Services.ServerService;
+using System.Threading.Tasks;
+using ByondHub.Core.Server.Services;
 using ByondHub.Shared.Updates;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace ByondHub.Controllers
+namespace ByondHub.Core.Server.Controllers
 {
     [Produces("application/json", "application/octet-stream")]
     [Route("api/[controller]")]
@@ -72,14 +73,14 @@ namespace ByondHub.Controllers
             return File(result.LogFileStream, "application/octet-stream", $"{serverId}.log");
         }
 
-        public IActionResult GetServerStatus(string serverId, [FromQuery] string secret)
+        public async Task<IActionResult> GetServerStatus(string serverId, [FromQuery] string secret)
         {
             if (!string.Equals(secret, _secret))
             {
                 throw new AuthenticationException("Authentication error."); 
             }
-
-            return _service.
+            var status = await _service.GetStatus(serverId);
+            return Json(status);
         }
     }
 }

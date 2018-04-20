@@ -3,13 +3,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using ByondHub.Core.Configuration;
-using ByondHub.Core.Services.ServerService.Models;
 using ByondHub.Shared.Updates;
 using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace ByondHub.Core.Services.ServerService
+namespace ByondHub.Core.Server.Services
 {
     public class ServerUpdater
     {

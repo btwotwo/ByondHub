@@ -1,10 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using ByondHub.Core.Services.ServerService.Models;
+﻿using System.Threading.Tasks;
 using ByondHub.Shared.Updates;
 using ByondHub.Shared.Web;
 
-namespace ByondHub.Core.Services.ServerService.ServerState
+namespace ByondHub.Core.Server.Models.ServerState
 {
     public class StartedServerState : ServerStateAbstract
     {

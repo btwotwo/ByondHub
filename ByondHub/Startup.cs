@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using ByondHub.Core.Middlewares;
-using ByondHub.Core.Services;
-using ByondHub.Core.Services.ServerService;
+using ByondHub.Core.Server.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

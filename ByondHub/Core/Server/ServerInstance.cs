@@ -2,12 +2,13 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
-using ByondHub.Core.Services.ServerService.ServerState;
+using ByondHub.Core.Server.Models.ServerState;
+using ByondHub.Core.Server.Services;
 using ByondHub.Shared.Updates;
 using ByondHub.Shared.Web;
 using Microsoft.Extensions.Logging;
 
-namespace ByondHub.Core.Services.ServerService.Models
+namespace ByondHub.Core.Server
 {
     public class ServerInstance
     {
@@ -39,12 +40,12 @@ namespace ByondHub.Core.Services.ServerService.Models
                 var info = new ProcessStartInfo($"{_dreamDaemonPath}")
                 {
                     Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself",
-                    CreateNoWindow = true,
-                    UseShellExecute = true
+                    UseShellExecute = true,
                 };
+                _process.EnableRaisingEvents = true;
                 _process = new Process {StartInfo = info};
-                _process.Start();
                 _process.Exited += HandleUnexpectedExit;
+                _process.Start();
 
                 if (_process.HasExited)
                 {

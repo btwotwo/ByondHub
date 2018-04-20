@@ -1,9 +1,8 @@
-﻿
-using System;
+﻿using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 
-namespace ByondHub.Core.Services.ServerLog
+namespace ByondHub.Core.Server.Services
 {
     public class ServerLogs
     {

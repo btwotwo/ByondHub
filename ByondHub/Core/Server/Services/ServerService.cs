@@ -3,23 +3,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
-using ByondHub.Core.Services.ServerService.Models;
 using ByondHub.Shared.Logs;
 using ByondHub.Shared.Updates;
 using ByondHub.Shared.Web;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace ByondHub.Core.Services.ServerService
+namespace ByondHub.Core.Server.Services
 {
     public class ServerService
     {
-        private readonly Dictionary<string, Server> _servers;
+        private readonly Dictionary<string, Models.Server> _servers;
         private readonly ILogger<ServerService> _logger;
 
         public ServerService(IConfiguration config, ILogger<ServerService> logger)
         {
-            _servers = new Dictionary<string, Server>();
+            _servers = new Dictionary<string, Models.Server>();
             _logger = logger;
 
             var builds = config.GetSection("Hub").GetSection("Builds").Get<BuildModel[]>();
@@ -27,7 +26,8 @@ namespace ByondHub.Core.Services.ServerService
             foreach (var build in builds)
             {
                 _servers.Add(build.Id,
-                    new Server(new ServerInstance(build, config["Hub:DreamDaemonPath"], updater, logger)));
+                    new Models.Server(new ServerInstance(build, config["Hub:DreamDaemonPath"], updater,
+                        config["Hub:VisibleAddress"], logger)));
             }
         }
 

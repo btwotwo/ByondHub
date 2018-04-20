@@ -3,7 +3,7 @@ using ByondHub.Core.Configuration;
 using ByondHub.Shared.Updates;
 using ByondHub.Shared.Web;
 
-namespace ByondHub.Core.Services.ServerService.Models
+namespace ByondHub.Core.Server.Models
 {
     public class Server
     {
@@ -18,22 +18,22 @@ namespace ByondHub.Core.Services.ServerService.Models
 
         public ServerStartStopResult Start(int port)
         {
-            return _serverInstance.State.Start(_serverInstance, port);
+            return _serverInstance.State.Start(port);
         }
 
         public ServerStartStopResult Stop()
         {
-            return _serverInstance.State.Stop(_serverInstance);
+            return _serverInstance.State.Stop();
         }
 
         public UpdateResult Update(UpdateRequest request)
         {
-            return _serverInstance.State.Update(_serverInstance, request);
+            return _serverInstance.State.Update(request);
         }
 
         public async Task<ServerStatusResult> GetStatusAsync()
         {
-            await _serverInstance.UpdateStatusAsync();
+            await _serverInstance.UpdatePlayersAsync();
             return _serverInstance.Status;
         }
     }

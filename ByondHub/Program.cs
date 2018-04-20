@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace ByondHub
 {
@@ -23,10 +22,6 @@ namespace ByondHub
             return WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .UseUrls($"http://localhost:{config["Server:Port"]}")
-                .ConfigureLogging((hostingContext, logging) =>
-                {
-                    logging.AddConsole();
-                })
                 .Build();
         }
 

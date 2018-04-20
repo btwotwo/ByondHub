@@ -6,13 +6,9 @@
 
   <ItemGroup>
     <Compile Remove="Core\Models\**" />
-    <Compile Remove="Core\Services\ServerLog\**" />
     <Content Remove="Core\Models\**" />
-    <Content Remove="Core\Services\ServerLog\**" />
     <EmbeddedResource Remove="Core\Models\**" />
-    <EmbeddedResource Remove="Core\Services\ServerLog\**" />
     <None Remove="Core\Models\**" />
-    <None Remove="Core\Services\ServerLog\**" />
   </ItemGroup>
 
   <ItemGroup>
