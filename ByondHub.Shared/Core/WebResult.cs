@@ -1,6 +1,6 @@
-﻿namespace ByondHub.Shared.Web
+﻿namespace ByondHub.Shared.Core
 {
-    public abstract class WebResult
+    public class WebResult
     {
         public bool Error { get; set; }
         public string ErrorMessage { get; set; }

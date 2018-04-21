@@ -1,7 +1,7 @@
 ﻿using System.IO;
-using ByondHub.Shared.Web;
+using ByondHub.Shared.Core;
 
-namespace ByondHub.Shared.Logs
+namespace ByondHub.Shared.Server
 {
     public class WorldLogResult : WebResult
     {

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using ByondHub.Core.Configuration;
-using ByondHub.Shared.Updates;
+using ByondHub.Shared.Server.Updates;
 using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

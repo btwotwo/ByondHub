@@ -2,7 +2,7 @@
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using ByondHub.Core.Server.Services;
-using ByondHub.Shared.Updates;
+using ByondHub.Shared.Server.Updates;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 

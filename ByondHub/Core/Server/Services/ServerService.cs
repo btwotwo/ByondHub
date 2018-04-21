@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
-using ByondHub.Shared.Logs;
-using ByondHub.Shared.Updates;
-using ByondHub.Shared.Web;
+using ByondHub.Shared.Server;
+using ByondHub.Shared.Server.Updates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 

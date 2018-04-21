@@ -1,6 +1,6 @@
 ﻿using ByondHub.Shared.Core;
 
-namespace ByondHub.Shared.Updates
+namespace ByondHub.Shared.Server.Updates
 {
     public class UpdateRequest : AuthenticatedRequest
     {

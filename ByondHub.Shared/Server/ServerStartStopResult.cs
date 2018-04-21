@@ -1,5 +1,7 @@
 ﻿
-namespace ByondHub.Shared.Web
+using ByondHub.Shared.Core;
+
+namespace ByondHub.Shared.Server
 {
     public class ServerStartStopResult : WebResult
     {

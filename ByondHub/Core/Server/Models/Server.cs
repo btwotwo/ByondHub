@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
-using ByondHub.Shared.Updates;
-using ByondHub.Shared.Web;
+using ByondHub.Shared.Server;
+using ByondHub.Shared.Server.Updates;
 
 namespace ByondHub.Core.Server.Models
 {

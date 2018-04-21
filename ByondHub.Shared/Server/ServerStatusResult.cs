@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ByondHub.Shared.Core;
 
-namespace ByondHub.Shared.Web
+namespace ByondHub.Shared.Server
 {
     public class ServerStatusResult : WebResult
     {
