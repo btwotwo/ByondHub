@@ -35,10 +35,9 @@ namespace ByondHub.Core.Services.ServerService.Models
                 var info = new ProcessStartInfo($"{_dreamDaemonPath}")
                 {
                     Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself",
-                    CreateNoWindow = true,
-                    UseShellExecute = true
+                    UseShellExecute = false,
                 };
-                _process = new Process {StartInfo = info};
+                _process = new Process {StartInfo = info, EnableRaisingEvents = true};
                 bool started = _process.Start();
                 _process.Exited += (sender, args) => State = new StoppedServerState();
                 if (!started || _process.HasExited)
