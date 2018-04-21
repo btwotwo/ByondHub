@@ -63,7 +63,8 @@ namespace ByondHub.Core.Server.Services
 
             var dreamMakerProcess = new Process
             {
-                StartInfo = startInfo
+                StartInfo = startInfo,
+                EnableRaisingEvents = true
             };
 
             var output = new StringBuilder();

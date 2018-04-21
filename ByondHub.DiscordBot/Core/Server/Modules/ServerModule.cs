@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Preconditions;
-using ByondHub.DiscordBot.Core.Services;
+using ByondHub.DiscordBot.Core.Server.Services;
 using Discord.Commands;
 using Discord.Net;
 
-namespace ByondHub.DiscordBot.Core.Modules
+namespace ByondHub.DiscordBot.Core.Server.Modules
 {
     [Group("server")]
     [RequireWhitelistedRole]

@@ -10,7 +10,7 @@ using ByondHub.Shared.Server.Updates;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
-namespace ByondHub.DiscordBot.Core.Services
+namespace ByondHub.DiscordBot.Core.Server.Services
 {
     public class ServerService
     {

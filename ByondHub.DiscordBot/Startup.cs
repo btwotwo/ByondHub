@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using ByondHub.DiscordBot.Core.Services;
+using ByondHub.DiscordBot.Core.Server.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
