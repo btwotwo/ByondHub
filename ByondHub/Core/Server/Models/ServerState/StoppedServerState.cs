@@ -14,7 +14,6 @@ namespace ByondHub.Core.Server.Models.ServerState
         {
             Server.State = new UpdatingServerState(Server);
             var result = Server.Update(request);
-            Server.State = new StoppedServerState(Server);
             return result;
         }
 
@@ -24,7 +23,6 @@ namespace ByondHub.Core.Server.Models.ServerState
             if (result.Error) return result;
 
             Server.State = new StartedServerState(Server);
-            Server.State.UpdateStatus();
             return result;
         }
 
@@ -47,7 +45,5 @@ namespace ByondHub.Core.Server.Models.ServerState
         {
             Server.Status.SetStopped();
         }
-
-
     }
 }

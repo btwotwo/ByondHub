@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text;
+using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Preconditions;
 using ByondHub.DiscordBot.Core.Server.Services;
+using Discord;
 using Discord.Commands;
 using Discord.Net;
 
@@ -94,6 +96,44 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
                 await ReplyAsync($"Got exception: ${e.Reason}");
             }
 
+        }
+
+        [Command("status", RunMode = RunMode.Async)]
+        [Summary("Gets server status.")]
+        public async Task GetServerStatus([Summary("Server id.")] string id)
+        {
+            var msg = await ReplyAsync("Updating server status...");
+            try
+            {
+                var status = await _server.SendStatusRequestAsync(id);
+                id = id.ToUpper();
+                if (status.Error)
+                {
+                    await msg.ModifyAsync(m => m.Content = $"{id} error: {status.ErrorMessage}");
+                    return;
+                }
+
+                if (status.IsUpdating)
+                {
+                    await msg.ModifyAsync(m => m.Content = $"{id} is updating. Check last update log later.");
+                    return;
+                }
+
+                if (status.IsRunning)
+                {
+                    await msg.ModifyAsync(m => m.Content = $"{id} is running.\n" +
+                                                           $"Players: {status.Players}\n" +
+                                                           $"Admins: {status.Admins}\n" +
+                                                           $"Join now: {status.Address}:{status.Port}");
+                    return;
+                }
+
+                await msg.ModifyAsync(m => m.Content = $"{id} is offline");
+            }
+            catch (HttpException e)
+            {
+                await msg.ModifyAsync(m => m.Content = $"Got exception: ${e.Reason}");
+            }
         }
     }
 }

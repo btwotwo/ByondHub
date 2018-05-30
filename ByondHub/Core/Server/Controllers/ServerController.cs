@@ -73,12 +73,9 @@ namespace ByondHub.Core.Server.Controllers
             return File(result.LogFileStream, "application/octet-stream", $"{serverId}.log");
         }
 
-        public async Task<IActionResult> GetServerStatus(string serverId, [FromQuery] string secret)
+        [HttpGet("status/{serverId}")]
+        public async Task<IActionResult> GetServerStatus(string serverId)
         {
-            if (!string.Equals(secret, _secret))
-            {
-                throw new AuthenticationException("Authentication error."); 
-            }
             var status = await _service.GetStatus(serverId);
             return Json(status);
         }

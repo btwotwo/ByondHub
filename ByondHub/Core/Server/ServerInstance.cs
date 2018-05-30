@@ -4,8 +4,11 @@ using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Server.Models.ServerState;
 using ByondHub.Core.Server.Services;
+using ByondHub.Core.Utility;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace ByondHub.Core.Server
@@ -22,15 +25,17 @@ namespace ByondHub.Core.Server
         public bool IsRunning => !_process.HasExited;
 
         public ServerStatusResult Status { get; }
+        private DateTime _playersUpdatedTimestamp;
 
-        public ServerInstance(BuildModel build, string dreamDaemonPath, ServerUpdater updater, string serverAddress, ILogger logger)
+        public ServerInstance(BuildModel build, IConfiguration config, string serverAddress, ILogger logger)
         {
             Build = build;
             State = new StoppedServerState(this);
             Status = new ServerStatusResult() { IsRunning = false, IsUpdating = false, Address = serverAddress };
-            _dreamDaemonPath = dreamDaemonPath;
-            _updater = updater;
+            _dreamDaemonPath = config["Hub:DreamDaemonPath"];
+            _updater = new ServerUpdater(config["Hub:DreamMakerPath"], logger, this);
             _logger = logger;
+            _playersUpdatedTimestamp = DateTime.Now;
         }
 
         public ServerStartStopResult Start(int port)
@@ -42,8 +47,11 @@ namespace ByondHub.Core.Server
                     Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself",
                     UseShellExecute = true,
                 };
-                _process.EnableRaisingEvents = true;
-                _process = new Process {StartInfo = info};
+                _process = new Process
+                {
+                    StartInfo = info,
+                    EnableRaisingEvents = true
+                };
                 _process.Exited += HandleUnexpectedExit;
                 _process.Start();
 
@@ -98,7 +106,22 @@ namespace ByondHub.Core.Server
 
         public async Task UpdatePlayersAsync()
         {
-            Status.Players++;
+            if (DateTime.Now - _playersUpdatedTimestamp >= TimeSpan.FromSeconds(30))
+            {
+                string response = await ByondTopic.GetDataAsync("127.0.0.1", Status.Port.ToString(), "status");
+
+                if (response == null)
+                {
+                    return;
+                }
+
+                var parsedResponse = QueryHelpers.ParseQuery(response);
+
+                Status.Players = int.Parse(parsedResponse["players"]);
+                Status.Admins = int.Parse(parsedResponse["admins"]);
+
+                _playersUpdatedTimestamp = DateTime.Now;
+            }
         }
 
         private void HandleUnexpectedExit(object sender, EventArgs args)

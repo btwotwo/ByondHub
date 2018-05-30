@@ -10,7 +10,7 @@ namespace ByondHub.Shared.Server
         public int Admins { get; set; }
         public int Players { get; set; }
         public int Port { get; set; }
-
+        public string LastBuildLog { get; set; }
 
         public void SetStarted()
         {
@@ -30,6 +30,7 @@ namespace ByondHub.Shared.Server
 
         public void SetUpdating()
         {
+            LastBuildLog = "";
             IsRunning = false;
             IsUpdating = false;
             Players = 0;

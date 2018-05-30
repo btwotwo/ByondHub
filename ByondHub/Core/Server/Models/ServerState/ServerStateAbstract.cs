@@ -11,6 +11,7 @@ namespace ByondHub.Core.Server.Models.ServerState
         protected ServerStateAbstract(ServerInstance server)
         {
             Server = server;
+            UpdateStatus();
         }
 
         public abstract UpdateResult Update(UpdateRequest request);

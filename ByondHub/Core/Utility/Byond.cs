@@ -11,10 +11,10 @@ namespace ByondHub.Core.Utility
 
         public static async void SendTopicCommand(string ip, string port, string command)
         {
-            await GetData(ip, port, command);
+            await GetDataAsync(ip, port, command);
         }
 
-        public static async Task<string> GetData(string ip, string port, string command)
+        public static async Task<string> GetDataAsync(string ip, string port, string command)
         {
             try
             {

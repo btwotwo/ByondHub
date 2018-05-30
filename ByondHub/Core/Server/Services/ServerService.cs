@@ -21,12 +21,11 @@ namespace ByondHub.Core.Server.Services
             _logger = logger;
 
             var builds = config.GetSection("Hub").GetSection("Builds").Get<BuildModel[]>();
-            var updater = new ServerUpdater(config, logger);
             foreach (var build in builds)
             {
                 _servers.Add(build.Id,
-                    new Models.Server(new ServerInstance(build, config["Hub:DreamDaemonPath"], updater,
-                        config["Hub:VisibleAddress"], logger)));
+                    new Models.Server(new ServerInstance(build, config,
+                        config["Hub:Address"], logger)));
             }
         }
 

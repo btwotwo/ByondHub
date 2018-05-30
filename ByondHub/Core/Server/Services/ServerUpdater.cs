@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using ByondHub.Core.Configuration;
+using ByondHub.Core.Server.Models.ServerState;
+using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
@@ -14,11 +16,13 @@ namespace ByondHub.Core.Server.Services
     {
         private readonly ILogger _logger;
         private readonly string _dreamMakerPath;
+        private readonly ServerInstance _server;
 
-        public ServerUpdater(IConfiguration config, ILogger logger)
+        public ServerUpdater(string dreamMakerPath, ILogger logger, ServerInstance server)
         {
             _logger = logger;
-            _dreamMakerPath = config["Hub:DreamMakerPath"];
+            _dreamMakerPath = dreamMakerPath;
+            _server = server;
         }
 
         public UpdateResult Update(BuildModel build, string branch, string commitHash)
@@ -31,26 +35,29 @@ namespace ByondHub.Core.Server.Services
 
                 if (result.UpToDate)
                 {
+                    _server.State = new StoppedServerState(_server);
                     return result;
                 }
 
-                Compile(build, ref result);
+                Compile(build, result);
                 return result;
             }
             catch (UpdateException ex)
             {
                 _logger.LogError(ex, "Error while updating.");
+                _server.State = new StoppedServerState(_server);
                 return new UpdateResult {Error = true, ErrorMessage = ex.Message};
             }
             catch (Exception ex)
             {
                 _logger.LogCritical(ex, "Failed to update.");
+                _server.State = new StoppedServerState(_server);
                 return new UpdateResult{Error = true, ErrorMessage = ex.Message};
             }
              
         }
 
-        private void Compile(BuildModel build, ref UpdateResult result)
+        private void Compile(BuildModel build, UpdateResult result)
         {
             _logger.LogInformation($"Starting to compile {build.Id}");
             var startInfo = new ProcessStartInfo(_dreamMakerPath)
@@ -74,16 +81,25 @@ namespace ByondHub.Core.Server.Services
                 => errorOutput.AppendLine(args.Data);
             dreamMakerProcess.OutputDataReceived += (sender, args)
                 => output.AppendLine(args.Data);
+            dreamMakerProcess.Exited += (sender, args) =>
+            {
+                string errors = errorOutput.ToString();
+                string log = output.ToString();
+
+                if (!string.IsNullOrEmpty(errors))
+                {
+                    log = errors;
+                }
+
+                _server.Status.LastBuildLog = log;
+                _logger.LogInformation($"Finished compiling {build.Id}");
+                dreamMakerProcess.Dispose();
+            };
 
             dreamMakerProcess.Start();
             dreamMakerProcess.BeginErrorReadLine();
             dreamMakerProcess.BeginOutputReadLine();
-            dreamMakerProcess.WaitForExit();
 
-            _logger.LogInformation($"Finished compiling {build.Id}");
-
-            result.ErrorMessage = errorOutput.ToString();
-            result.Output = output.ToString();
         }
 
         private UpdateResult Pull(string repository, string username, string commitHash, string branchName)

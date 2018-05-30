@@ -33,7 +33,7 @@ namespace ByondHub.Core.Server.Models
 
         public async Task<ServerStatusResult> GetStatusAsync()
         {
-            await _serverInstance.UpdatePlayersAsync();
+            await _serverInstance.State.UpdatePlayersAsync();
             return _serverInstance.Status;
         }
     }

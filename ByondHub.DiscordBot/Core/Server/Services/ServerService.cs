@@ -97,5 +97,18 @@ namespace ByondHub.DiscordBot.Core.Server.Services
             var result = JsonConvert.DeserializeObject<WorldLogResult>(resultJson);
             return result;
         }
+
+        public async Task<ServerStatusResult> SendStatusRequestAsync(string serverId)
+        {
+            var response = await _http.GetAsync($"{ApiEndpoints.Status}/{serverId}");
+            string resultText = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Got {response.StatusCode} with following text: {resultText}");
+            }
+            var result = JsonConvert.DeserializeObject<ServerStatusResult>(resultText);
+            return result;
+        }
     }
 }

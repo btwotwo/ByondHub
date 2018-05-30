@@ -37,7 +37,6 @@ namespace ByondHub.Core.Server.Models.ServerState
             if (result.Error) return result;
 
             Server.State = new StoppedServerState(Server);
-            Server.State.UpdateStatus();
             return result;
         }
 
