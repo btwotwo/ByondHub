@@ -27,7 +27,6 @@ namespace ByondHub
 
             Config = configBuilder.Build();
             services.AddMvc();
-            services.AddSingleton<ServerService>();
             services.AddSingleton(Config);
         }
 
