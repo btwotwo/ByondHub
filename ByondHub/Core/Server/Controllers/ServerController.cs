@@ -9,6 +9,7 @@ using ByondHub.Shared.Server.Updates;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ByondHub.Core.Server.Controllers
 {
@@ -20,18 +21,19 @@ namespace ByondHub.Core.Server.Controllers
         private readonly Dictionary<string, Models.Server> _servers;
         private readonly ILogger _logger;
 
-        public ServerController(IConfiguration config, ILogger logger)
+        public ServerController(IOptions<Config> options, ILogger logger)
         {
-            _secret = config["Hub:SecretCode"]; //temporary solution
+            var config = options.Value;
+            _secret = config.Hub.SecretCode; //temporary solution
             _servers = new Dictionary<string, Models.Server>();
             _logger = logger;
 
-            var builds = config.GetSection("Hub").GetSection("Builds").Get<BuildModel[]>();
+            var builds = config.Hub.Builds;
             foreach (var build in builds)
             {
                 _servers.Add(build.Id,
-                    new Models.Server(new ServerInstance(build, config,
-                        config["Hub:Address"], logger)));
+                    new Models.Server(new ServerInstance(build, options,
+                        config.Hub.Address, logger)));
             }
         }
 

@@ -10,6 +10,7 @@ using ByondHub.Shared.Server.Updates;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ByondHub.Core.Server
 {
@@ -27,13 +28,14 @@ namespace ByondHub.Core.Server
         public ServerStatusResult Status { get; }
         private DateTime _playersUpdatedTimestamp;
 
-        public ServerInstance(BuildModel build, IConfiguration config, string serverAddress, ILogger logger)
+        public ServerInstance(BuildModel build, IOptions<Config> options, string serverAddress, ILogger logger)
         {
+            var config = options.Value;
             Build = build;
             State = new StoppedServerState(this);
             Status = new ServerStatusResult() { IsRunning = false, IsUpdating = false, Address = serverAddress };
-            _dreamDaemonPath = config["Hub:DreamDaemonPath"];
-            _updater = new ServerUpdater(config["Hub:DreamMakerPath"], logger, this);
+            _dreamDaemonPath = config.Hub.DreamDaemonPath;
+            _updater = new ServerUpdater(config.Hub.DreamMakerPath, logger, this);
             _logger = logger;
             _playersUpdatedTimestamp = DateTime.Now;
         }
