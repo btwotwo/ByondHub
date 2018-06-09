@@ -12,11 +12,11 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
     [RequireWhitelistedRole]
     public class ServerModule : ModuleBase<SocketCommandContext>
     {
-        private readonly ServerService _server;
+        private readonly IServerRequester _server;
 
-        public ServerModule(ServerService service)
+        public ServerModule(IServerRequester requester)
         {
-            _server = service;
+            _server = requester;
         }
 
         [Command("start")]

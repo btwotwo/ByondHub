@@ -12,15 +12,15 @@ using Newtonsoft.Json;
 
 namespace ByondHub.DiscordBot.Core.Server.Services
 {
-    public class ServerService
+    public class ServerHttpRequester : IServerRequester
     {
         private readonly HttpClient _http;
         private readonly string _secret;
 
-        public ServerService(IConfiguration config)
+        public ServerHttpRequester(IConfiguration config)
         {
-            _secret = config["Bot:Backend:SecretCode"];
             var uriBuilder = new UriBuilder("http", config["Bot:Backend:Host"], int.Parse(config["Bot:Backend:Port"]));
+            _secret = config["Bot:Backend:SecretCode"];
             _http = new HttpClient
             {
                 BaseAddress = uriBuilder.Uri,
@@ -69,7 +69,13 @@ namespace ByondHub.DiscordBot.Core.Server.Services
 
         public async Task<UpdateResult> SendUpdateRequestAsync(string serverId, string branch, string commitHash)
         {
-            var request = new UpdateRequest() {Branch = branch, CommitHash = commitHash, SecretKey = _secret, Id = serverId};
+            var request = new UpdateRequest()
+            {
+                Branch = branch,
+                CommitHash = commitHash,
+                SecretKey = _secret,
+                Id = serverId
+            };
             HttpContent content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8,
                 "application/json");
 
@@ -78,7 +84,11 @@ namespace ByondHub.DiscordBot.Core.Server.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"Got {response.StatusCode} with following JSON {resultJson}");
+                return new UpdateResult
+                {
+                    Error = true,
+                    ErrorMessage = $"Got {response.StatusCode} with following JSON {resultJson}"
+                };
             }
 
             var result = JsonConvert.DeserializeObject<UpdateResult>(resultJson);
@@ -105,7 +115,11 @@ namespace ByondHub.DiscordBot.Core.Server.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"Got {response.StatusCode} with following text: {resultText}");
+                return new ServerStatusResult()
+                {
+                    Error = true,
+                    ErrorMessage = $"Got {response.StatusCode} with following text: {resultText}"
+                };
             }
             var result = JsonConvert.DeserializeObject<ServerStatusResult>(resultText);
             return result;

@@ -66,7 +66,7 @@ namespace ByondHub.DiscordBot
                 .AddSingleton(_commands)
                 .AddSingleton(_logger)
                 .AddSingleton(Configuration)
-                .AddSingleton<ServerService>()
+                .AddSingleton<IServerRequester, ServerHttpRequester>()
                 .BuildServiceProvider();
         }
 
