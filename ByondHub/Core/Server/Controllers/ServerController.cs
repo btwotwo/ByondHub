@@ -4,6 +4,7 @@ using System.IO;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
+using ByondHub.Core.Server.Services;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 using Microsoft.AspNetCore.Mvc;
@@ -18,24 +19,17 @@ namespace ByondHub.Core.Server.Controllers
     public class ServerController : Controller
     {
         private readonly string _secret;
-        private readonly Dictionary<string, Models.Server> _servers;
-        private readonly ILogger _logger;
+        private readonly ILogger<ServerController> _logger;
+        private readonly ServerFactory _servers;
 
-        public ServerController(IOptions<Config> options, ILogger logger)
+        public ServerController(IOptions<Config> options, ILogger<ServerController> logger, ServerFactory servers)
         {
             var config = options.Value;
             _secret = config.Hub.SecretCode; //temporary solution
-            _servers = new Dictionary<string, Models.Server>();
             _logger = logger;
-
-            var builds = config.Hub.Builds;
-            foreach (var build in builds)
-            {
-                _servers.Add(build.Id,
-                    new Models.Server(new ServerInstance(build, options,
-                        config.Hub.Address, logger)));
-            }
+            _servers = servers;
         }
+
 
         [HttpPost("start/{serverId}")]
         public IActionResult Start(string serverId, [FromForm] string secret, [FromForm] int port)
@@ -44,15 +38,8 @@ namespace ByondHub.Core.Server.Controllers
             {
                 throw new Exception("Authentication error."); // again, all of these are temporary
             }
-
-            try
-            {
-                var server = _servers[serverId];
-
-                _logger.LogInformation($"Starting server with id {serverId}, port: {port}");
-                return Json(server.Start(port));
-            }
-            catch (KeyNotFoundException)
+            var server = _servers.GetServer(serverId);
+            if (server == null)
             {
                 return Json(new ServerStartStopResult
                 {
@@ -61,6 +48,10 @@ namespace ByondHub.Core.Server.Controllers
                     ErrorMessage = "Server not found."
                 });
             }
+
+            _logger.LogInformation($"Starting server with id {serverId}, port: {port}");
+            return Json(server.Start(port));
+
         }
 
         [HttpPost("stop/{serverId}")]
@@ -70,21 +61,17 @@ namespace ByondHub.Core.Server.Controllers
             {
                 throw new Exception("Authentication error.");
             }
+            var server = _servers.GetServer(serverId);
 
-            ServerStartStopResult result;
-
-            try
+            if (server == null)
             {
-                var server = _servers[serverId];
-                _logger.LogInformation($"Killing server with id {serverId}.");
-                result = server.Stop();
-            }
-            catch (KeyNotFoundException)
-            {
-                result = new ServerStartStopResult { Error = true, Id = serverId, ErrorMessage = "Server not found." };
+                return Json(
+                    new ServerStartStopResult() {Error = true, Id = serverId, ErrorMessage = "Server not found"});
             }
 
-            return Json(result);
+            _logger.LogInformation($"Killing server with id {serverId}.");
+            return Json(server.Stop());
+
         }
 
         [HttpPost("update/{serverId}")]
@@ -94,18 +81,13 @@ namespace ByondHub.Core.Server.Controllers
             {
                 throw new Exception("Authentication error.");
             }
-
-            UpdateResult res;
-            try
+            var server = _servers.GetServer(serverId);
+            if (server == null)
             {
-                var server = _servers[request.Id];
-                res = server.Update(request);
+                return Json(new UpdateResult { Error = true, Id = request.Id, ErrorMessage = "Server not found." });
             }
-            catch (KeyNotFoundException)
-            {
-                res = new UpdateResult { Error = true, Id = request.Id, ErrorMessage = "Server not found." };
-            }
-            return Json(res);
+            _logger.LogInformation($"Updating server {serverId}");
+            return Json(server.Update(request));
         }
 
         [HttpGet("worldLog/{serverId}")]
@@ -116,26 +98,24 @@ namespace ByondHub.Core.Server.Controllers
                 throw new AuthenticationException("Authentication error.");
             }
 
-            WorldLogResult result;
 
-            try
+            var server = _servers.GetServer(serverId);
+
+            if (server == null)
             {
-                var server = _servers[serverId];
-                string path = Path.Combine(server.Build.Path, $"{server.Build.ExecutableName}.log");
-
-                bool fileExists = System.IO.File.Exists(path);
-                if (!fileExists)
-                {
-                    return Json(new WorldLogResult { Error = true, ErrorMessage = "World Log not found.", Id = serverId });
-                }
-
-                var stream = new FileStream(path, FileMode.Open);
-                result = new WorldLogResult { LogFileStream = stream };
+                return Json(new WorldLogResult { Error = true, ErrorMessage = "Server not found", Id = serverId });
             }
-            catch (KeyNotFoundException)
+
+            string path = Path.Combine(server.Build.Path, $"{server.Build.ExecutableName}.log");
+
+            bool fileExists = System.IO.File.Exists(path);
+            if (!fileExists)
             {
-                result = new WorldLogResult { Error = true, ErrorMessage = "Server not found.", Id = serverId };
+                return Json(new WorldLogResult { Error = true, ErrorMessage = "World Log not found.", Id = serverId });
             }
+
+            var stream = new FileStream(path, FileMode.Open);
+            var result = new WorldLogResult { LogFileStream = stream };
 
             if (result.Error)
             {
@@ -147,17 +127,11 @@ namespace ByondHub.Core.Server.Controllers
         [HttpGet("status/{serverId}")]
         public async Task<IActionResult> GetServerStatus(string serverId)
         {
-            ServerStatusResult result;
-            try
-            {
-                var server = _servers[serverId];
-                result = await server.GetStatusAsync();
-            }
-            catch (KeyNotFoundException)
-            {
-                result = new ServerStatusResult() { Error = true, ErrorMessage = $"{serverId} not found." };
-            }
-            return Json(result);
+            var server = _servers.GetServer(serverId);
+
+            return server == null
+                ? Json(new ServerStatusResult() {Error = true, ErrorMessage = $"{serverId} not found."})
+                : Json(await server.GetStatusAsync());
         }
     }
 }

@@ -29,7 +29,9 @@ namespace ByondHub
             Config = configBuilder.Build();
             services.AddMvc();
             services.AddSingleton(Config);
+            services.AddSingleton<ServerFactory>();
             services.Configure<Config>(Config);
+            services.AddLogging();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

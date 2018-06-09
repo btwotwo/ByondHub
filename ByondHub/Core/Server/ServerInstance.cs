@@ -32,8 +32,8 @@ namespace ByondHub.Core.Server
         {
             var config = options.Value;
             Build = build;
-            State = new StoppedServerState(this);
             Status = new ServerStatusResult() { IsRunning = false, IsUpdating = false, Address = serverAddress };
+            State = new StoppedServerState(this);
             _dreamDaemonPath = config.Hub.DreamDaemonPath;
             _updater = new ServerUpdater(config.Hub.DreamMakerPath, logger, this);
             _logger = logger;
