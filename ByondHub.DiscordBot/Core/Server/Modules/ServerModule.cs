@@ -64,8 +64,8 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
             if (updateResult.UpToDate)
             {
                 await ReplyAsync(
-                    $"Update request for \"{id}\" is finished." +
-                    $" Server is up-to-date on branch \"{updateResult.Branch}\" and " +
+                    $"Update request for \"{id}\" is finished. " +
+                    $"Server is up-to-date on branch \"{updateResult.Branch}\" and " +
                     $"on commit \"{updateResult.CommitHash}\" ({updateResult.CommitMessage}).");
                 return;
             }
