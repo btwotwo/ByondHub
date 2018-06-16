@@ -1,7 +1,7 @@
 ﻿using System.IO;
+using ByondHub.Core.Configuration;
 using ByondHub.Core.Middlewares;
-using ByondHub.Core.Services;
-using ByondHub.Core.Services.ServerService;
+using ByondHub.Core.Server.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -28,8 +28,10 @@ namespace ByondHub
 
             Config = configBuilder.Build();
             services.AddMvc();
-            services.AddSingleton<ServerService>();
             services.AddSingleton(Config);
+            services.AddSingleton<ServerFactory>();
+            services.Configure<Config>(Config);
+            services.AddLogging();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
