@@ -82,7 +82,7 @@ namespace ByondHub.DiscordBot
             if (message == null) return;
             if (msg.Author.Id == _client.CurrentUser.Id) return;
 
-            int argPos = 0;
+            var argPos = 0;
             string prefix = Configuration["Bot:Prefix"];
             bool hasStringPrefix;
             hasStringPrefix = !string.IsNullOrEmpty(prefix) &&

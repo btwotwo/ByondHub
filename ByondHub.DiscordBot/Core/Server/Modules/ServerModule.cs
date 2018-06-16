@@ -135,5 +135,11 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
                 await msg.ModifyAsync(m => m.Content = $"Got exception: ${e.Reason}");
             }
         }
+
+        [Command("status-update")]
+        public async void SetStatusUpdate()
+        {
+            
+        }
     }
 }
