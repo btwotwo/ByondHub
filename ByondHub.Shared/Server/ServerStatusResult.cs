@@ -32,7 +32,7 @@ namespace ByondHub.Shared.Server
         {
             LastBuildLog = "";
             IsRunning = false;
-            IsUpdating = false;
+            IsUpdating = true;
             Players = 0;
             Admins = 0;
         }

@@ -70,8 +70,8 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
                 return;
             }
 
-            await ReplyAsync($"Update request for \"{id}\" is finished: {updateResult.Output}\n" +
-                             $"Server is on branch \"{updateResult.Branch}\" and on commit \"{updateResult.CommitHash}\" ({updateResult.CommitMessage}).");
+            await ReplyAsync($"Server \"{id}\" is compiling right now" +
+                             $" on branch \"{updateResult.Branch}\" and on commit \"{updateResult.CommitHash}\" ({updateResult.CommitMessage}).");
         }
 
         [Command("worldlog")]
@@ -102,37 +102,58 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
         [Summary("Gets server status.")]
         public async Task GetServerStatus([Summary("Server id.")] string id)
         {
-            var msg = await ReplyAsync("Updating server status...");
+            await ReplyAsync("Updating server status...");
             try
             {
                 var status = await _server.SendStatusRequestAsync(id);
                 id = id.ToUpper();
                 if (status.Error)
                 {
-                    await msg.ModifyAsync(m => m.Content = $"{id} error: {status.ErrorMessage}");
-                    return;
+                    await ReplyAsync($"{id} error: {status.ErrorMessage}");
                 }
-
-                if (status.IsUpdating)
+                else if (status.IsUpdating)
                 {
-                    await msg.ModifyAsync(m => m.Content = $"{id} is updating. Check last update log later.");
-                    return;
+                    await ReplyAsync($"{id} is updating. Check last update log later.");
                 }
-
-                if (status.IsRunning)
+                else if (status.IsRunning)
                 {
-                    await msg.ModifyAsync(m => m.Content = $"{id} is running.\n" +
-                                                           $"Players: {status.Players}\n" +
-                                                           $"Admins: {status.Admins}\n" +
-                                                           $"Join now: {status.Address}:{status.Port}");
-                    return;
+                    await ReplyAsync($"{id} is running.\n" +
+                                     $"Players: {status.Players}\n" +
+                                     $"Admins: {status.Admins}\n" +
+                                     $"Join now: {status.Address}:{status.Port}");
+                }
+                else
+                {
+                    await ReplyAsync($"{id} is offline");
                 }
 
-                await msg.ModifyAsync(m => m.Content = $"{id} is offline");
             }
             catch (HttpException e)
             {
-                await msg.ModifyAsync(m => m.Content = $"Got exception: ${e.Reason}");
+                await ReplyAsync($"Got exception: ${e.Reason}");
+            }
+        }
+
+        [Command("buildlog", RunMode = RunMode.Async)]
+        [Summary("Get server build log.")]
+        public async Task GetBuildLog([Summary("Server id")]string id)
+        {
+            var status = await _server.SendStatusRequestAsync(id);
+            if (status.Error)
+            {
+                await ReplyAsync($"Got error: {status.ErrorMessage}");
+            }
+            if (status.IsUpdating)
+            {
+                await ReplyAsync($"Server '{id}' is updating. Please check build log later");
+            }
+            else if (string.IsNullOrEmpty(status.LastBuildLog))
+            {
+                await ReplyAsync($"Build log for '{id}' is empty.");
+            }
+            else
+            {
+                await ReplyAsync($"Build log for '{id}':\n{status.LastBuildLog}");
             }
         }
     }

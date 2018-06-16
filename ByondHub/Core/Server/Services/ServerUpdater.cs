@@ -37,7 +37,7 @@ namespace ByondHub.Core.Server.Services
                     return result;
                 }
 
-                Compile(build, result);
+                StartCompilingProcess(build, result);
                 return result;
             }
             catch (UpdateException ex)
@@ -55,7 +55,7 @@ namespace ByondHub.Core.Server.Services
              
         }
 
-        private void Compile(BuildModel build, UpdateResult result)
+        private void StartCompilingProcess(BuildModel build, UpdateResult result)
         {
             _logger.LogInformation($"Starting to compile {build.Id}");
             var startInfo = new ProcessStartInfo(_dreamMakerPath)
@@ -84,12 +84,13 @@ namespace ByondHub.Core.Server.Services
                 string errors = errorOutput.ToString();
                 string log = output.ToString();
 
-                if (!string.IsNullOrEmpty(errors))
+                if (errors != "\r\n" && !string.IsNullOrEmpty(errors))
                 {
                     log = errors;
                 }
 
                 _server.Status.LastBuildLog = log;
+                _server.State = new StoppedServerState(_server);
                 _logger.LogInformation($"Finished compiling {build.Id}");
                 dreamMakerProcess.Dispose();
             };

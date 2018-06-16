@@ -64,8 +64,7 @@ namespace ByondHub.Tests
         public async void ServerModule_ServerUpdateNotUpToDate_ReturnsSuccessMessage()
         {
             const string expectedMessage =
-                "Update request for \"test\" is finished: Now that's what I call output!\n" +
-                "Server is on branch \"test-branch\" and on commit \"aaabbbccc\" (Test commit).";
+                "Server \"test\" is compiling right now on branch \"test-branch\" and on commit \"aaabbbccc\" (Test commit).";
             var mockedRequester = new Mock<IServerRequester>();
             var successUpdateResult = new UpdateResult()
             {
