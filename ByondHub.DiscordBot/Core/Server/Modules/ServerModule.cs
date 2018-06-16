@@ -71,7 +71,8 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
             }
 
             await ReplyAsync($"Server \"{id}\" is compiling right now" +
-                             $" on branch \"{updateResult.Branch}\" and on commit \"{updateResult.CommitHash}\" ({updateResult.CommitMessage}).");
+                             $" on branch \"{updateResult.Branch}\" and on commit \"{updateResult.CommitHash}\" ({updateResult.CommitMessage}).\n" +
+                             $"You can check build log with \"server buildlog {id}\" command");
         }
 
         [Command("worldlog")]
@@ -113,7 +114,7 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
                 }
                 else if (status.IsUpdating)
                 {
-                    await ReplyAsync($"{id} is updating. Check last update log later.");
+                    await ReplyAsync($"{id} is updating. Check update log with command \"server buildlog {id.ToLower()}\"");
                 }
                 else if (status.IsRunning)
                 {
@@ -136,14 +137,14 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
 
         [Command("buildlog", RunMode = RunMode.Async)]
         [Summary("Get server build log.")]
-        public async Task GetBuildLog([Summary("Server id")]string id)
+        public async Task GetBuildLog([Summary("Server id")] string id)
         {
             var status = await _server.SendStatusRequestAsync(id);
             if (status.Error)
             {
                 await ReplyAsync($"Got error: {status.ErrorMessage}");
             }
-            if (status.IsUpdating)
+            else if (status.IsUpdating)
             {
                 await ReplyAsync($"Server '{id}' is updating. Please check build log later");
             }
