@@ -5,5 +5,5 @@ dotnet: 2.1.4
 
 script:
   - dotnet restore
-  - dotnet test
+  - dotnet test ./ByondHub.Tests -c Release
   - dotnet build
