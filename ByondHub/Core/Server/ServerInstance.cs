@@ -103,6 +103,7 @@ namespace ByondHub.Core.Server
         public UpdateResult Update(UpdateRequest request)
         {
             var result = _updater.Update(Build, request.Branch, request.CommitHash);
+            Status.LastBuildLog = result.Output;
             return result;
         }
 
