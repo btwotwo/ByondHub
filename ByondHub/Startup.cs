@@ -29,7 +29,7 @@ namespace ByondHub
             Config = configBuilder.Build();
             services.AddMvc();
             services.AddSingleton(Config);
-            services.AddSingleton<ServerFactory>();
+            services.AddSingleton<ServerStore>();
             services.Configure<Config>(Config);
             services.AddLogging();
         }

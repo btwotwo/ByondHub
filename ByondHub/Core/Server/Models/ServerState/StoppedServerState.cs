@@ -14,6 +14,7 @@ namespace ByondHub.Core.Server.Models.ServerState
         {
             Server.State = new UpdatingServerState(Server);
             var result = Server.Update(request);
+            Server.State = new StoppedServerState(Server);
             return result;
         }
 

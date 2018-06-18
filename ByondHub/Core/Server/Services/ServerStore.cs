@@ -7,11 +7,11 @@ using Microsoft.Extensions.Options;
 
 namespace ByondHub.Core.Server.Services
 {
-    public class ServerFactory
+    public class ServerStore
     {
         private readonly Dictionary<string, Models.Server> _servers;
 
-        public ServerFactory(IOptions<Config> options, IServiceProvider services)
+        public ServerStore(IOptions<Config> options, IServiceProvider services)
         {
             var config = options.Value;
             _servers = new Dictionary<string, Models.Server>();

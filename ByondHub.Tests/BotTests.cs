@@ -64,7 +64,7 @@ namespace ByondHub.Tests
         public async void ServerModule_ServerUpdateNotUpToDate_ReturnsSuccessMessage()
         {
             const string expectedMessage =
-                "Server \"test\" is compiling right now on branch \"test-branch\" and on commit \"aaabbbccc\" (Test commit).\nYou can check build log with \"server buildlog test\" command";
+                "Server \"test\" was compiled on branch \"test-branch\" and on commit \"aaabbbccc\" (Test commit).\nBuild log:\nOUTPUT";
             var mockedRequester = new Mock<IServerRequester>();
             var successUpdateResult = new UpdateResult()
             {
@@ -72,7 +72,7 @@ namespace ByondHub.Tests
                 CommitHash = "aaabbbccc",
                 CommitMessage = "Test commit",
                 Id = "test",
-                Output = "Now that's what I call output!"
+                Output = "OUTPUT"
             };
             mockedRequester.Setup(x => x.SendUpdateRequestAsync("test", "master", "")).ReturnsAsync(successUpdateResult);
 
