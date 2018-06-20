@@ -20,9 +20,9 @@ namespace ByondHub.Core.Server.Controllers
     {
         private readonly string _secret;
         private readonly ILogger<ServerController> _logger;
-        private readonly ServerFactory _servers;
+        private readonly ServerStore _servers;
 
-        public ServerController(IOptions<Config> options, ILogger<ServerController> logger, ServerFactory servers)
+        public ServerController(IOptions<Config> options, ILogger<ServerController> logger, ServerStore servers)
         {
             var config = options.Value;
             _secret = config.Hub.SecretCode; //temporary solution

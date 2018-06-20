@@ -35,7 +35,7 @@ namespace ByondHub.Core.Server
             Status = new ServerStatusResult() { IsRunning = false, IsUpdating = false, Address = serverAddress };
             State = new StoppedServerState(this);
             _dreamDaemonPath = config.Hub.DreamDaemonPath;
-            _updater = new ServerUpdater(config.Hub.DreamMakerPath, logger, this);
+            _updater = new ServerUpdater(config.Hub.DreamMakerPath, logger);
             _logger = logger;
             _playersUpdatedTimestamp = DateTime.Now;
         }
@@ -46,8 +46,7 @@ namespace ByondHub.Core.Server
             {
                 var info = new ProcessStartInfo($"{_dreamDaemonPath}")
                 {
-                    Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself",
-                    UseShellExecute = true,
+                    Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself"
                 };
                 _process = new Process
                 {
@@ -103,6 +102,7 @@ namespace ByondHub.Core.Server
         public UpdateResult Update(UpdateRequest request)
         {
             var result = _updater.Update(Build, request.Branch, request.CommitHash);
+            Status.LastBuildLog = result.Output;
             return result;
         }
 

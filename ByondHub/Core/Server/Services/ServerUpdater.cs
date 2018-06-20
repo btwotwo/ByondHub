@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using ByondHub.Core.Configuration;
-using ByondHub.Core.Server.Models.ServerState;
 using ByondHub.Shared.Server.Updates;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
@@ -14,13 +13,11 @@ namespace ByondHub.Core.Server.Services
     {
         private readonly ILogger _logger;
         private readonly string _dreamMakerPath;
-        private readonly ServerInstance _server;
 
-        public ServerUpdater(string dreamMakerPath, ILogger logger, ServerInstance server)
+        public ServerUpdater(string dreamMakerPath, ILogger logger)
         {
             _logger = logger;
             _dreamMakerPath = dreamMakerPath;
-            _server = server;
         }
 
         public UpdateResult Update(BuildModel build, string branch, string commitHash)
@@ -33,7 +30,6 @@ namespace ByondHub.Core.Server.Services
 
                 if (result.UpToDate)
                 {
-                    _server.State = new StoppedServerState(_server);
                     return result;
                 }
 
@@ -43,16 +39,14 @@ namespace ByondHub.Core.Server.Services
             catch (UpdateException ex)
             {
                 _logger.LogError(ex, "Error while updating.");
-                _server.State = new StoppedServerState(_server);
                 return new UpdateResult {Error = true, ErrorMessage = ex.Message};
             }
             catch (Exception ex)
             {
                 _logger.LogCritical(ex, "Failed to update.");
-                _server.State = new StoppedServerState(_server);
-                return new UpdateResult{Error = true, ErrorMessage = ex.Message};
+                return new UpdateResult {Error = true, ErrorMessage = ex.Message};
             }
-             
+
         }
 
         private void Compile(BuildModel build, UpdateResult result)
@@ -79,25 +73,22 @@ namespace ByondHub.Core.Server.Services
                 => errorOutput.AppendLine(args.Data);
             dreamMakerProcess.OutputDataReceived += (sender, args)
                 => output.AppendLine(args.Data);
-            dreamMakerProcess.Exited += (sender, args) =>
-            {
-                string errors = errorOutput.ToString();
-                string log = output.ToString();
-
-                if (!string.IsNullOrEmpty(errors))
-                {
-                    log = errors;
-                }
-
-                _server.Status.LastBuildLog = log;
-                _logger.LogInformation($"Finished compiling {build.Id}");
-                dreamMakerProcess.Dispose();
-            };
 
             dreamMakerProcess.Start();
             dreamMakerProcess.BeginErrorReadLine();
             dreamMakerProcess.BeginOutputReadLine();
+            dreamMakerProcess.WaitForExit();
 
+            string errors = errorOutput.ToString();
+            string log = output.ToString();
+
+            if (!string.IsNullOrWhiteSpace(errors))
+            {
+                log = errors;
+            }
+
+            result.Output = log;
+            _logger.LogInformation($"Finished compiling {build.Id}");
         }
 
         private UpdateResult Pull(string repository, string username, string commitHash, string branchName)
