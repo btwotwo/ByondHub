@@ -46,8 +46,7 @@ namespace ByondHub.Core.Server
             {
                 var info = new ProcessStartInfo($"{_dreamDaemonPath}")
                 {
-                    Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself",
-                    UseShellExecute = true,
+                    Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself"
                 };
                 _process = new Process
                 {
