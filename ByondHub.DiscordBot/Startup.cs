@@ -62,11 +62,12 @@ namespace ByondHub.DiscordBot
         private void InstallServices()
         {
             _services = new ServiceCollection()
+                .AddSingleton(Configuration)
                 .AddSingleton(_client)
                 .AddSingleton(_commands)
                 .AddSingleton(_logger)
-                .AddSingleton(Configuration)
                 .AddSingleton<IServerRequester, ServerHttpRequester>()
+                .AddSingleton<StatusService>()
                 .BuildServiceProvider();
         }
 

@@ -1,10 +1,12 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Preconditions;
 using ByondHub.DiscordBot.Core.Server.Services;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
+using Microsoft.Extensions.Configuration;
 
 namespace ByondHub.DiscordBot.Core.Server.Modules
 {
@@ -13,10 +15,14 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
     public class ServerModule : ModuleBase<SocketCommandContext>
     {
         private readonly IServerRequester _server;
+        private readonly StatusService _statusUpdater;
+        private readonly IConfiguration _config;
 
-        public ServerModule(IServerRequester requester)
+        public ServerModule(IServerRequester requester, StatusService statusUpdater, IConfiguration config)
         {
             _server = requester;
+            _statusUpdater = statusUpdater;
+            _config = config;
         }
 
         [Command("start")]
@@ -158,10 +164,28 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
             }
         }
 
-        [Command("status-update")]
-        public async void SetStatusUpdate()
+      
+        [Command("update-status")]
+        public async Task SetStatusUpdate([Summary("Server id")] string id)
         {
-            
+            var statusChannelId = _config.GetSection("Bot:InfoChannelId").Get<ulong>();
+            var channel = Context.Guild.GetTextChannel(statusChannelId);
+
+            if (channel == null)
+            {
+                await ReplyAsync("Status channel not found. Check your config.");
+            }
+
+            var result = await _statusUpdater.StartUpdatingAsync(id, channel);
+            if (result.Error)
+            {
+                await ReplyAsync($"Error! {result.ErrorMessage}");
+            }
+            else
+            {
+                await ReplyAsync(result.Message);
+            }
         }
     }
 }
+
