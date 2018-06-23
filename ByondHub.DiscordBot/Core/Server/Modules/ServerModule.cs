@@ -165,7 +165,7 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
         }
 
       
-        [Command("update-status")]
+        [Command("status-start")]
         public async Task SetStatusUpdate([Summary("Server id")] string id)
         {
             var statusChannelId = _config.GetSection("Bot:InfoChannelId").Get<ulong>();
@@ -179,7 +179,21 @@ namespace ByondHub.DiscordBot.Core.Server.Modules
             var result = await _statusUpdater.StartUpdatingAsync(id, channel);
             if (result.Error)
             {
-                await ReplyAsync($"Error! {result.ErrorMessage}");
+                await ReplyAsync($"Error: {result.ErrorMessage}");
+            }
+            else
+            {
+                await ReplyAsync(result.Message);
+            }
+        }
+
+        [Command("status-stop")]
+        public async Task StopStatusUpdate([Summary("Server id.")] string id)
+        {
+            var result = await _statusUpdater.StopUpdatingAsync(id);
+            if (result.Error)
+            {
+                await ReplyAsync($"Error: {result.ErrorMessage}");
             }
             else
             {

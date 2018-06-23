@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Text;
 using System.Threading.Tasks;
 using ByondHub.Shared.Server;
 using Discord;
@@ -19,7 +16,16 @@ namespace ByondHub.DiscordBot.Core.Models
         {
             StatusResult = newStatus;
             var embed = StatusResult.Error ? BuildErrorEmbed() : BuildStatusEmbed();
-            await Message.ModifyAsync(x => x.Embed = embed);
+            await Message.ModifyAsync(x =>
+            {
+                x.Content = "";
+                x.Embed = embed;
+            });
+        }
+
+        public async Task StopAsync()
+        {
+            await Message.DeleteAsync();
         }
 
         private Embed BuildStatusEmbed()

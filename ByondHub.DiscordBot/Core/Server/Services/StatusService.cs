@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Models;
 using ByondHub.Shared.Server;
 using Discord;
-using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 
 namespace ByondHub.DiscordBot.Core.Server.Services
@@ -53,6 +51,25 @@ namespace ByondHub.DiscordBot.Core.Server.Services
             _statuses[id] = status;
             return new ServerStatusResult {Message = "Started server status updating."};
         }
+
+        public async Task<ServerStatusResult> StopUpdatingAsync(string id)
+        {
+            var status = _statuses.GetValueOrDefault(id);
+
+            if (status == null)
+            {
+                return new ServerStatusResult()
+                {
+                    Error = true,
+                    ErrorMessage = $"{id.ToUpper()} status is not updating. "
+                }; 
+            }
+
+            _statuses.Remove(id);
+            await status.StopAsync();
+            return new ServerStatusResult() {Message = "Stopped status updating."};
+        }
+
         private async void UpdateStatusesAsync(object state)
         {
             try
@@ -61,19 +78,8 @@ namespace ByondHub.DiscordBot.Core.Server.Services
                 {
                     return;
                 }
-
-                foreach (var (id, status) in statuses)
-                {
-                    try
-                    {
-                        var newStatus = await _requester.SendStatusRequestAsync(id);
-                        await status.UpdateAsync(newStatus);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError($"Error updating server status. Id: {id}. {e}");
-                    }
-                }
+                var tasks = statuses.Select(x => UpdateServerStatusAsync(x.Value, x.Key));
+                await Task.WhenAll(tasks.ToArray());
             }
             catch (Exception e)
             {
@@ -84,5 +90,20 @@ namespace ByondHub.DiscordBot.Core.Server.Services
                 _statusUpdateTimer.Change(5000, Timeout.Infinite);
             }
         }
+
+        private async Task UpdateServerStatusAsync(Status status, string id)
+        {
+            try
+            {
+                var newStatus = await _requester.SendStatusRequestAsync(id);
+                await status.UpdateAsync(newStatus);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Error updating server status. Id: {status.ServerId}. {e}");
+            }
+        }
+
     }
+
 }
