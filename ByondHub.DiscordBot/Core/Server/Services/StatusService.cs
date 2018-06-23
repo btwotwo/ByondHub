@@ -78,8 +78,10 @@ namespace ByondHub.DiscordBot.Core.Server.Services
                 {
                     return;
                 }
-                var tasks = statuses.Select(x => UpdateServerStatusAsync(x.Value, x.Key));
-                await Task.WhenAll(tasks.ToArray());
+                foreach (var status in statuses)
+                {
+                    await UpdateServerStatusAsync(status.Value, status.Key);
+                }
             }
             catch (Exception e)
             {
@@ -87,7 +89,7 @@ namespace ByondHub.DiscordBot.Core.Server.Services
             }
             finally
             {
-                _statusUpdateTimer.Change(5000, Timeout.Infinite);
+                _statusUpdateTimer.Change(10000, Timeout.Infinite);
             }
         }
 
