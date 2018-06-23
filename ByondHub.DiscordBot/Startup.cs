@@ -62,11 +62,12 @@ namespace ByondHub.DiscordBot
         private void InstallServices()
         {
             _services = new ServiceCollection()
+                .AddSingleton(Configuration)
                 .AddSingleton(_client)
                 .AddSingleton(_commands)
                 .AddSingleton(_logger)
-                .AddSingleton(Configuration)
                 .AddSingleton<IServerRequester, ServerHttpRequester>()
+                .AddSingleton<StatusService>()
                 .BuildServiceProvider();
         }
 
@@ -82,7 +83,7 @@ namespace ByondHub.DiscordBot
             if (message == null) return;
             if (msg.Author.Id == _client.CurrentUser.Id) return;
 
-            int argPos = 0;
+            var argPos = 0;
             string prefix = Configuration["Bot:Prefix"];
             bool hasStringPrefix;
             hasStringPrefix = !string.IsNullOrEmpty(prefix) &&

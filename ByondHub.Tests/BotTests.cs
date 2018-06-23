@@ -123,7 +123,7 @@ namespace ByondHub.Tests
     internal class ServerModuleWrapper : ServerModule
     {
         public string LastMessage { get; set; }
-        public ServerModuleWrapper(IServerRequester requester) : base(requester)
+        public ServerModuleWrapper(IServerRequester requester) : base(requester, null, null)
         {}
         protected override async Task<IUserMessage> ReplyAsync(string message, bool isTTS = false, Embed embed = null, RequestOptions options = null)
         {
