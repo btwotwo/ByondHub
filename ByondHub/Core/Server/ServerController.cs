@@ -28,8 +28,8 @@ namespace ByondHub.Core.Server
         }
 
 
-        [HttpPost("start/{serverId}")]
-        public IActionResult Start(string serverId, [FromForm] string secret, [FromForm] int port)
+        [HttpPost("{serverId}/start")]
+        public IActionResult Start(string serverId, [FromBody] string secret, [FromQuery] int port)
         {
             if (!string.Equals(secret, _secret))
             {
@@ -51,8 +51,8 @@ namespace ByondHub.Core.Server
 
         }
 
-        [HttpPost("stop/{serverId}")]
-        public IActionResult Stop(string serverId, [FromForm] string secret)
+        [HttpPost("{serverId}/stop")]
+        public IActionResult Stop(string serverId, [FromBody] string secret)
         {
             if (!string.Equals(secret, _secret))
             {
@@ -71,7 +71,7 @@ namespace ByondHub.Core.Server
 
         }
 
-        [HttpPost("update/{serverId}")]
+        [HttpPost("{serverId}/update")]
         public IActionResult Update(string serverId, [FromBody] UpdateRequest request)
         {
             if (!string.Equals(request.SecretKey, _secret))
@@ -87,8 +87,8 @@ namespace ByondHub.Core.Server
             return Json(server.Update(request));
         }
 
-        [HttpGet("worldLog/{serverId}")]
-        public IActionResult GetWorldLog(string serverId, [FromQuery] string secret)
+        [HttpGet("/{serverId}/worldlog")]
+        public IActionResult GetWorldLog(string serverId, [FromBody] string secret)
         {
             if (!string.Equals(secret, _secret))
             {
@@ -121,7 +121,7 @@ namespace ByondHub.Core.Server
             return File(result.LogFileStream, "application/octet-stream", $"{serverId}.log");
         }
 
-        [HttpGet("status/{serverId}")]
+        [HttpGet("{serverId}")]
         public async Task<IActionResult> GetServerStatus(string serverId)
         {
             var server = _servers.GetServer(serverId);

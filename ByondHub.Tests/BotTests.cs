@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using ByondHub.DiscordBot.Core.Server.Modules;
+using ByondHub.DiscordBot.Core.Server;
 using ByondHub.DiscordBot.Core.Server.Services;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
@@ -125,10 +125,10 @@ namespace ByondHub.Tests
         public string LastMessage { get; set; }
         public ServerModuleWrapper(IServerRequester requester) : base(requester, null, null)
         {}
-        protected override async Task<IUserMessage> ReplyAsync(string message, bool isTTS = false, Embed embed = null, RequestOptions options = null)
+        protected override Task<IUserMessage> ReplyAsync(string message, bool isTTS = false, Embed embed = null, RequestOptions options = null)
         {
             LastMessage = message;
-            return new DummyUserMessage();
+            return Task.FromResult(new DummyUserMessage() as IUserMessage);
         }
     }
 

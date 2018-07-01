@@ -31,12 +31,8 @@ namespace ByondHub.DiscordBot.Core.Server.Services
 
         public async Task<ServerStartStopResult> SendStartRequestAsync(string serverId, int port)
         {
-            var content = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>("port", port.ToString()),
-                new KeyValuePair<string, string>("secret", _secret)
-            });
-            var responseMessage = await _http.PostAsync($"{ApiEndpoints.ServerStart}/{serverId}", content);
+            var content = new StringContent(serverId);
+            var responseMessage = await _http.PostAsync(ApiEndpoints.ServerStart(serverId, port), content);
             string resultJson = await responseMessage.Content.ReadAsStringAsync();
 
             if (string.IsNullOrEmpty(resultJson))
@@ -51,11 +47,8 @@ namespace ByondHub.DiscordBot.Core.Server.Services
 
         public async Task<ServerStartStopResult> SendStopRequestAsync(string serverId)
         {
-            var content = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>("secret", _secret)
-            });
-            var responseMessage = await _http.PostAsync($"{ApiEndpoints.ServerStop}/{serverId}", content);
+            var content = new StringContent(serverId);
+            var responseMessage = await _http.PostAsync(ApiEndpoints.ServerStop(serverId), content);
             string resultJson = await responseMessage.Content.ReadAsStringAsync();
 
             if (string.IsNullOrEmpty(resultJson))
@@ -79,7 +72,7 @@ namespace ByondHub.DiscordBot.Core.Server.Services
             HttpContent content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8,
                 "application/json");
 
-            var response = await _http.PostAsync($"{ApiEndpoints.ServerUpdate}/{serverId}", content);
+            var response = await _http.PostAsync(ApiEndpoints.ServerUpdate(serverId), content);
             string resultJson = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -97,7 +90,12 @@ namespace ByondHub.DiscordBot.Core.Server.Services
 
         public async Task<WorldLogResult> SendWorldLogRequestAsync(string serverId)
         {
-            var response = await _http.GetAsync($"{ApiEndpoints.WorldLog}/{serverId}?secret={_secret}");
+            var request =
+                new HttpRequestMessage(HttpMethod.Get, ApiEndpoints.WorldLog(serverId))
+                {
+                    Content = new StringContent(_secret)
+                };
+            var response = await _http.SendAsync(request);
             string contentType = response.Content.Headers.ContentType.MediaType;
             if (contentType != "application/json")
             {
@@ -110,7 +108,7 @@ namespace ByondHub.DiscordBot.Core.Server.Services
 
         public async Task<ServerStatusResult> SendStatusRequestAsync(string serverId)
         {
-            var response = await _http.GetAsync($"{ApiEndpoints.Status}/{serverId}");
+            var response = await _http.GetAsync(ApiEndpoints.Status(serverId));
             string resultText = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)

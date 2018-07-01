@@ -1,14 +1,11 @@
-﻿using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ByondHub.DiscordBot.Core.Preconditions;
 using ByondHub.DiscordBot.Core.Server.Services;
-using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Microsoft.Extensions.Configuration;
 
-namespace ByondHub.DiscordBot.Core.Server.Modules
+namespace ByondHub.DiscordBot.Core.Server
 {
     [Group("server")]
     [RequireWhitelistedRole]
