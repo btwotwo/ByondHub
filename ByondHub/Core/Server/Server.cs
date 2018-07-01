@@ -3,7 +3,7 @@ using ByondHub.Core.Configuration;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 
-namespace ByondHub.Core.Server.Models
+namespace ByondHub.Core.Server
 {
     public class Server
     {

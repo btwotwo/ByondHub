@@ -5,21 +5,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ByondHub.Core.Server.Services
+namespace ByondHub.Core.Server
 {
     public class ServerStore
     {
-        private readonly Dictionary<string, Models.Server> _servers;
+        private readonly Dictionary<string, Server> _servers;
 
         public ServerStore(IOptions<Config> options, IServiceProvider services)
         {
             var config = options.Value;
-            _servers = new Dictionary<string, Models.Server>();
+            _servers = new Dictionary<string, Server>();
             var builds = config.Hub.Builds;
             foreach (var build in builds)
             {
                 _servers.Add(build.Id,
-                    new Models.Server(
+                    new Server(
                         new ServerInstance(build, options,
                             config.Hub.Address, services.GetService<ILogger<ServerInstance>>()
                         )
@@ -28,7 +28,7 @@ namespace ByondHub.Core.Server.Services
             }
         }
 
-        public Models.Server GetServer(string id)
+        public Server GetServer(string id)
         {
             return _servers.GetValueOrDefault(id);
         }

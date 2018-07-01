@@ -7,7 +7,7 @@ using ByondHub.Shared.Server.Updates;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 
-namespace ByondHub.Core.Server.Services
+namespace ByondHub.Core.Server
 {
     public class ServerUpdater
     {

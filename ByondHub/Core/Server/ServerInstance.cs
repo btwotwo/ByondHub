@@ -2,13 +2,11 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
-using ByondHub.Core.Server.Models.ServerState;
-using ByondHub.Core.Server.Services;
+using ByondHub.Core.Server.ServerState;
 using ByondHub.Core.Utility;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -32,7 +30,7 @@ namespace ByondHub.Core.Server
         {
             var config = options.Value;
             Build = build;
-            Status = new ServerStatusResult() { IsRunning = false, IsUpdating = false, Address = serverAddress };
+            Status = new ServerStatusResult() { IsRunning = false, IsUpdating = false, Address = serverAddress, Id = build.Id};
             State = new StoppedServerState(this);
             _dreamDaemonPath = config.Hub.DreamDaemonPath;
             _updater = new ServerUpdater(config.Hub.DreamMakerPath, logger);

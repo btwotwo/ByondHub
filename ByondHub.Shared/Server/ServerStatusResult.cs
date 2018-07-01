@@ -11,6 +11,7 @@ namespace ByondHub.Shared.Server
         public int Players { get; set; }
         public int Port { get; set; }
         public string LastBuildLog { get; set; }
+        public string Id { get; set; }
 
         public void SetStarted()
         {

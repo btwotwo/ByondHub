@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
-using ByondHub.Core.Server.Services;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ByondHub.Core.Server.Controllers
+namespace ByondHub.Core.Server
 {
     [Produces("application/json", "application/octet-stream")]
     [Route("api/[controller]")]

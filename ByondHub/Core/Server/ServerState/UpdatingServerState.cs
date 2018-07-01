@@ -2,7 +2,7 @@
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 
-namespace ByondHub.Core.Server.Models.ServerState
+namespace ByondHub.Core.Server.ServerState
 {
     public class UpdatingServerState : ServerStateAbstract
     {
