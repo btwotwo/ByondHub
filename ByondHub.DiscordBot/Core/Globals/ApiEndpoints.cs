@@ -6,6 +6,6 @@
         public static string ServerStop (string id) => $"/api/server/{id}/stop";
         public static string ServerUpdate (string id) => $"/api/server/{id}/update";
         public static string WorldLog (string id) => $"/api/server/{id}/worldLog";
-        public static string Status (string id) => $"/api/server/{id}/status";
+        public static string Status (string id) => $"/api/server/{id}/";
     }
 }
