@@ -15,16 +15,15 @@ namespace ByondHub.Core.Server
     public class ServerInstance
     {
         private Process _process;
+        private DateTime _playersUpdatedTimestamp;
+
         private readonly string _dreamDaemonPath;
         private readonly ServerUpdater _updater;
         private readonly ILogger _logger;
 
         public ServerStateAbstract State { get; set; }
         public BuildModel Build { get; }
-        public bool IsRunning => !_process.HasExited;
-
         public ServerStatusResult Status { get; }
-        private DateTime _playersUpdatedTimestamp;
 
         public ServerInstance(BuildModel build, IOptions<Config> options, string serverAddress, ILogger logger)
         {
