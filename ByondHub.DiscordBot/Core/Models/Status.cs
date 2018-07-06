@@ -36,7 +36,7 @@ namespace ByondHub.DiscordBot.Core.Models
             if (StatusResult.IsRunning)
             {
                 embedBuilder.AddField("Join now!",
-                    $"{StatusResult.Address}:{StatusResult.Port}");
+                    $"<{StatusResult.Address}:{StatusResult.Port}>");
                 embedBuilder.AddInlineField("Players", StatusResult.Players);
                 embedBuilder.AddInlineField("Admins", StatusResult.Admins);
                 
