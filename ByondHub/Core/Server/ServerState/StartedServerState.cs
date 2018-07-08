@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 
@@ -11,7 +12,7 @@ namespace ByondHub.Core.Server.ServerState
         {
         }
 
-        public override UpdateResult Update(UpdateRequest request)
+        public override UpdateResult Update(UpdateRequest request, Func<UpdateRequest, UpdateResult> updateFunc)
         {
             return new UpdateResult
             {
@@ -21,7 +22,7 @@ namespace ByondHub.Core.Server.ServerState
             };
         }
 
-        public override ServerStartStopResult Start(int port)
+        public override ServerStartStopResult Start(int port, Func<int, ServerStartStopResult> startFunc)
         {
             return new ServerStartStopResult
             {
@@ -31,18 +32,18 @@ namespace ByondHub.Core.Server.ServerState
             };
         }
 
-        public override ServerStartStopResult Stop()
+        public override ServerStartStopResult Stop(Func<ServerStartStopResult> stopFunc)
         {
-            var result = Server.Stop();
+            var result = stopFunc();
             if (result.Error) return result;
 
             Server.State = new StoppedServerState(Server);
             return result;
         }
 
-        public override async Task UpdatePlayersAsync()
+        public override async Task UpdatePlayersAsync(Func<Task> updatePlayersFunc)
         {
-            await Server.UpdatePlayersAsync();
+            await updatePlayersFunc();
         }
 
         public override void UpdateStatus()

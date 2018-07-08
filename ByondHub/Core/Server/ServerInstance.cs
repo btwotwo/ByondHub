@@ -39,6 +39,61 @@ namespace ByondHub.Core.Server
 
         public ServerStartStopResult Start(int port)
         {
+            return State.Start(port, StartInternal);
+        }
+
+        public ServerStartStopResult Stop()
+        {
+            return State.Stop(StopInternal);
+        }
+
+        public UpdateResult Update(UpdateRequest request)
+        {
+            return State.Update(request, UpdateInternal);
+        }
+
+        public async Task<ServerStatusResult> GetStatusAsync()
+        {
+            await State.UpdatePlayersAsync(UpdatePlayersInternalAsync);
+            return Status;
+        }
+        private ServerStartStopResult StopInternal()
+        {
+            _process.Exited -= HandleUnexpectedExit;
+            _process.Kill();
+            _process.Dispose();
+            return new ServerStartStopResult { Id = Build.Id, Message = "Server stopped." };
+        }
+
+        private UpdateResult UpdateInternal(UpdateRequest request)
+        {
+            var result = _updater.Update(Build, request.Branch, request.CommitHash);
+            Status.LastBuildLog = result.Output;
+            return result;
+        }
+
+        private async Task UpdatePlayersInternalAsync()
+        {
+            if (DateTime.Now - _playersUpdatedTimestamp >= TimeSpan.FromSeconds(30))
+            {
+                string response = await ByondTopic.GetDataAsync("127.0.0.1", Status.Port.ToString(), "status");
+
+                if (response == null)
+                {
+                    return;
+                }
+
+                var parsedResponse = QueryHelpers.ParseQuery(response);
+
+                Status.Players = int.Parse(parsedResponse["players"]);
+                Status.Admins = int.Parse(parsedResponse["admins"]);
+
+                _playersUpdatedTimestamp = DateTime.Now;
+            }
+        }
+
+        private ServerStartStopResult StartInternal(int port)
+        {
             try
             {
                 var info = new ProcessStartInfo($"{_dreamDaemonPath}")
@@ -85,42 +140,6 @@ namespace ByondHub.Core.Server
                 };
             }
             
-        }
-
-
-        public ServerStartStopResult Stop()
-        {
-            _process.Exited -= HandleUnexpectedExit;
-            _process.Kill();
-            _process.Dispose();
-            return new ServerStartStopResult {Id = Build.Id, Message = "Server stopped."};
-        }
-
-        public UpdateResult Update(UpdateRequest request)
-        {
-            var result = _updater.Update(Build, request.Branch, request.CommitHash);
-            Status.LastBuildLog = result.Output;
-            return result;
-        }
-
-        public async Task UpdatePlayersAsync()
-        {
-            if (DateTime.Now - _playersUpdatedTimestamp >= TimeSpan.FromSeconds(30))
-            {
-                string response = await ByondTopic.GetDataAsync("127.0.0.1", Status.Port.ToString(), "status");
-
-                if (response == null)
-                {
-                    return;
-                }
-
-                var parsedResponse = QueryHelpers.ParseQuery(response);
-
-                Status.Players = int.Parse(parsedResponse["players"]);
-                Status.Admins = int.Parse(parsedResponse["admins"]);
-
-                _playersUpdatedTimestamp = DateTime.Now;
-            }
         }
 
         private void HandleUnexpectedExit(object sender, EventArgs args)

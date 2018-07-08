@@ -87,7 +87,7 @@ namespace ByondHub.Core.Server
             return Json(server.Update(request));
         }
 
-        [HttpGet("/{serverId}/worldlog")]
+        [HttpGet("{serverId}/worldlog")]
         public IActionResult GetWorldLog(string serverId, [FromBody] string secret)
         {
             if (!string.Equals(secret, _secret))

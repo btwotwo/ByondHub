@@ -9,26 +9,25 @@ namespace ByondHub.Core.Server
 {
     public class ServerStore
     {
-        private readonly Dictionary<string, Server> _servers;
+        private readonly Dictionary<string, ServerInstance> _servers;
 
         public ServerStore(IOptions<Config> options, IServiceProvider services)
         {
             var config = options.Value;
-            _servers = new Dictionary<string, Server>();
             var builds = config.Hub.Builds;
+            _servers = new Dictionary<string, ServerInstance>();
+
             foreach (var build in builds)
             {
                 _servers.Add(build.Id,
-                    new Server(
-                        new ServerInstance(build, options,
-                            config.Hub.Address, services.GetService<ILogger<ServerInstance>>()
-                        )
+                    new ServerInstance(build, options,
+                        config.Hub.Address, services.GetService<ILogger<ServerInstance>>()
                     )
                 );
             }
         }
 
-        public Server GetServer(string id)
+        public ServerInstance GetServer(string id)
         {
             return _servers.GetValueOrDefault(id);
         }

@@ -31,7 +31,7 @@ namespace ByondHub.DiscordBot.Core.Server.Services
 
         public async Task<ServerStartStopResult> SendStartRequestAsync(string serverId, int port)
         {
-            var content = new StringContent(serverId);
+            var content = BuildStringContent($"\"{_secret}\"");
             var responseMessage = await _http.PostAsync(ApiEndpoints.ServerStart(serverId, port), content);
             string resultJson = await responseMessage.Content.ReadAsStringAsync();
 
@@ -47,7 +47,7 @@ namespace ByondHub.DiscordBot.Core.Server.Services
 
         public async Task<ServerStartStopResult> SendStopRequestAsync(string serverId)
         {
-            var content = new StringContent(serverId);
+            var content = BuildStringContent($"\"{_secret}\"");
             var responseMessage = await _http.PostAsync(ApiEndpoints.ServerStop(serverId), content);
             string resultJson = await responseMessage.Content.ReadAsStringAsync();
 
@@ -69,8 +69,7 @@ namespace ByondHub.DiscordBot.Core.Server.Services
                 SecretKey = _secret,
                 Id = serverId
             };
-            HttpContent content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8,
-                "application/json");
+            HttpContent content = BuildStringContent(JsonConvert.SerializeObject(request));
 
             var response = await _http.PostAsync(ApiEndpoints.ServerUpdate(serverId), content);
             string resultJson = await response.Content.ReadAsStringAsync();
@@ -93,7 +92,7 @@ namespace ByondHub.DiscordBot.Core.Server.Services
             var request =
                 new HttpRequestMessage(HttpMethod.Get, ApiEndpoints.WorldLog(serverId))
                 {
-                    Content = new StringContent(_secret)
+                    Content = BuildStringContent($"\"{_secret}\"")
                 };
             var response = await _http.SendAsync(request);
             string contentType = response.Content.Headers.ContentType.MediaType;
@@ -121,6 +120,11 @@ namespace ByondHub.DiscordBot.Core.Server.Services
             }
             var result = JsonConvert.DeserializeObject<ServerStatusResult>(resultText);
             return result;
+        }
+
+        private static StringContent BuildStringContent(string content)
+        {
+            return new StringContent(content, Encoding.UTF8, "application/json");
         }
     }
 }
