@@ -1,4 +1,4 @@
-# Byond Hub [![Build Status](https://travis-ci.org/bo20202/ByondHub.svg?branch=master)](https://travis-ci.org/bo20202/ByondHub)
+# Byond Hub [![Build Status](https://travis-ci.org/botwotwo/ByondHub.svg?branch=master)](https://travis-ci.org/bo20202/ByondHub)
 
 A hub for managing SS13 Byond servers. Shipped with Discord bot🤖
 
