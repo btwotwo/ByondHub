@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
-using ByondHub.Core.Server.Services;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ByondHub.Core.Server.Controllers
+namespace ByondHub.Core.Server
 {
     [Produces("application/json", "application/octet-stream")]
     [Route("api/[controller]")]
@@ -31,8 +28,8 @@ namespace ByondHub.Core.Server.Controllers
         }
 
 
-        [HttpPost("start/{serverId}")]
-        public IActionResult Start(string serverId, [FromForm] string secret, [FromForm] int port)
+        [HttpPost("{serverId}/start")]
+        public IActionResult Start(string serverId, [FromBody] string secret, [FromQuery] int port)
         {
             if (!string.Equals(secret, _secret))
             {
@@ -54,8 +51,8 @@ namespace ByondHub.Core.Server.Controllers
 
         }
 
-        [HttpPost("stop/{serverId}")]
-        public IActionResult Stop(string serverId, [FromForm] string secret)
+        [HttpPost("{serverId}/stop")]
+        public IActionResult Stop(string serverId, [FromBody] string secret)
         {
             if (!string.Equals(secret, _secret))
             {
@@ -74,7 +71,7 @@ namespace ByondHub.Core.Server.Controllers
 
         }
 
-        [HttpPost("update/{serverId}")]
+        [HttpPost("{serverId}/update")]
         public IActionResult Update(string serverId, [FromBody] UpdateRequest request)
         {
             if (!string.Equals(request.SecretKey, _secret))
@@ -90,8 +87,8 @@ namespace ByondHub.Core.Server.Controllers
             return Json(server.Update(request));
         }
 
-        [HttpGet("worldLog/{serverId}")]
-        public IActionResult GetWorldLog(string serverId, [FromQuery] string secret)
+        [HttpGet("{serverId}/worldlog")]
+        public IActionResult GetWorldLog(string serverId, [FromBody] string secret)
         {
             if (!string.Equals(secret, _secret))
             {
@@ -124,7 +121,7 @@ namespace ByondHub.Core.Server.Controllers
             return File(result.LogFileStream, "application/octet-stream", $"{serverId}.log");
         }
 
-        [HttpGet("status/{serverId}")]
+        [HttpGet("{serverId}")]
         public async Task<IActionResult> GetServerStatus(string serverId)
         {
             var server = _servers.GetServer(serverId);

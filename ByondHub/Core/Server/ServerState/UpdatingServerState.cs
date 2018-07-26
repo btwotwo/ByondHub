@@ -1,8 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 
-namespace ByondHub.Core.Server.Models.ServerState
+namespace ByondHub.Core.Server.ServerState
 {
     public class UpdatingServerState : ServerStateAbstract
     {
@@ -10,7 +11,7 @@ namespace ByondHub.Core.Server.Models.ServerState
         {
         }
 
-        public override UpdateResult Update(UpdateRequest request)
+        public override UpdateResult Update(UpdateRequest request, Func<UpdateRequest, UpdateResult> updateFunc)
         {
             return new UpdateResult
             {
@@ -20,7 +21,7 @@ namespace ByondHub.Core.Server.Models.ServerState
             };
         }
 
-        public override ServerStartStopResult Start(int port)
+        public override ServerStartStopResult Start(int port, Func<int, ServerStartStopResult> startFunc)
         {
             return new ServerStartStopResult()
             {
@@ -30,7 +31,7 @@ namespace ByondHub.Core.Server.Models.ServerState
             };
         }
 
-        public override ServerStartStopResult Stop()
+        public override ServerStartStopResult Stop(Func<ServerStartStopResult> stopFunc)
         {
             return new ServerStartStopResult()
             {
@@ -40,7 +41,7 @@ namespace ByondHub.Core.Server.Models.ServerState
             };
         }
 
-        public override Task UpdatePlayersAsync()
+        public override Task UpdatePlayersAsync(Func<Task> updatePlayersFunc)
         {
             return Task.CompletedTask;
         }
