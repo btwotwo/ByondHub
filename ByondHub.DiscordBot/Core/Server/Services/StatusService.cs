@@ -78,7 +78,7 @@ namespace ByondHub.DiscordBot.Core.Server.Services
                 {
                     return;
                 }
-                foreach (var status in statuses)
+                foreach (var status in statuses.ToList())
                 {
                     await UpdateServerStatusAsync(status.Value, status.Key);
                 }

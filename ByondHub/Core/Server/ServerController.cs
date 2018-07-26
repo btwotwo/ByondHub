@@ -121,7 +121,7 @@ namespace ByondHub.Core.Server
             return File(result.LogFileStream, "application/octet-stream", $"{serverId}.log");
         }
 
-        [HttpGet("/{serverId}")]
+        [HttpGet("{serverId}")]
         public async Task<IActionResult> GetServerStatus(string serverId)
         {
             var server = _servers.GetServer(serverId);
