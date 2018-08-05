@@ -16,7 +16,7 @@ namespace ByondHub.Core.Server.ServerState
         }
 
         public abstract UpdateResult Update(UpdateRequest request, Func<UpdateRequest, UpdateResult> updateFunc);
-        public abstract ServerStartStopResult Start(int port, Func<int, ServerStartStopResult> startFunc);
+        public abstract ServerStartStopResult Start(ushort port, Func<ushort, ServerStartStopResult> startFunc);
         public abstract ServerStartStopResult Stop(Func<ServerStartStopResult> stopFunc);
         public abstract Task UpdatePlayersAsync(Func<Task> updatePlayersFunc);
         public abstract void UpdateStatus();

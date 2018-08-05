@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ByondHub.Core.Utility
+namespace ByondHub.Core.Utility.Byond
 {
     public static class ByondTopic
     {

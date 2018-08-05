@@ -29,16 +29,16 @@ namespace ByondHub.Core.Server
 
 
         [HttpPost("{serverId}/start")]
-        public IActionResult Start(string serverId, [FromBody] string secret, [FromQuery] int port)
+        public IActionResult Start(string serverId, [FromBody] string secret, [FromQuery] ushort port)
         {
             if (!string.Equals(secret, _secret))
             {
-                throw new Exception("Authentication error."); // again, all of these are temporary
+               return Forbid("Authentication error."); // again, all of these are temporary
             }
             var server = _servers.GetServer(serverId);
             if (server == null)
             {
-                return Json(new ServerStartStopResult
+                return BadRequest(new ServerStartStopResult
                 {
                     Error = true,
                     Id = serverId,
@@ -56,18 +56,18 @@ namespace ByondHub.Core.Server
         {
             if (!string.Equals(secret, _secret))
             {
-                throw new Exception("Authentication error.");
+                return Forbid("Authentication error.");
             }
             var server = _servers.GetServer(serverId);
 
             if (server == null)
             {
-                return Json(
+                return BadRequest(
                     new ServerStartStopResult() {Error = true, Id = serverId, ErrorMessage = "Server not found"});
             }
 
             _logger.LogInformation($"Killing server with id {serverId}.");
-            return Json(server.Stop());
+            return Ok(server.Stop());
 
         }
 
@@ -76,7 +76,7 @@ namespace ByondHub.Core.Server
         {
             if (!string.Equals(request.SecretKey, _secret))
             {
-                throw new Exception("Authentication error.");
+                return Forbid("Authentication error.");
             }
             var server = _servers.GetServer(serverId);
             if (server == null)
@@ -92,15 +92,14 @@ namespace ByondHub.Core.Server
         {
             if (!string.Equals(secret, _secret))
             {
-                throw new AuthenticationException("Authentication error.");
+                return Forbid("Authentication error.");
             }
-
 
             var server = _servers.GetServer(serverId);
 
             if (server == null)
             {
-                return Json(new WorldLogResult { Error = true, ErrorMessage = "Server not found", Id = serverId });
+                return NotFound(new WorldLogResult { Error = true, ErrorMessage = "Server not found", Id = serverId });
             }
 
             string path = Path.Combine(server.Build.Path, $"{server.Build.ExecutableName}.log");

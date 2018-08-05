@@ -1,23 +1,30 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using ByondHub.Core.Configuration;
+using ByondHub.Core.Utility.Byond;
 using ByondHub.Shared.Server.Updates;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 
 namespace ByondHub.Core.Server
 {
-    public class ServerUpdater
+    public interface IServerUpdater
+    {
+        UpdateResult Update(BuildModel build, string branch, string commitHash);
+    }
+
+    public class ServerUpdater : IServerUpdater
     {
         private readonly ILogger _logger;
-        private readonly string _dreamMakerPath;
+        private readonly IByondWrapper _byond;
 
-        public ServerUpdater(string dreamMakerPath, ILogger logger)
+        public ServerUpdater(ILogger logger, IByondWrapper byond)
         {
             _logger = logger;
-            _dreamMakerPath = dreamMakerPath;
+            _byond = byond;
         }
 
         public UpdateResult Update(BuildModel build, string branch, string commitHash)
@@ -32,8 +39,8 @@ namespace ByondHub.Core.Server
                 {
                     return result;
                 }
-
-                Compile(build, result);
+                string buildPath = Path.Combine(build.Path, $"{build.ExecutableName}.dme");
+                result.Output = _byond.CompileWorld(buildPath);
                 return result;
             }
             catch (UpdateException ex)
@@ -47,48 +54,6 @@ namespace ByondHub.Core.Server
                 return new UpdateResult {Error = true, ErrorMessage = ex.Message};
             }
 
-        }
-
-        private void Compile(BuildModel build, UpdateResult result)
-        {
-            _logger.LogInformation($"Starting to compile {build.Id}");
-            var startInfo = new ProcessStartInfo(_dreamMakerPath)
-            {
-                Arguments = $"{build.Path}/{build.ExecutableName}.dme",
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
-            };
-
-            var dreamMakerProcess = new Process
-            {
-                StartInfo = startInfo,
-                EnableRaisingEvents = true
-            };
-
-            var output = new StringBuilder();
-            var errorOutput = new StringBuilder();
-
-            dreamMakerProcess.ErrorDataReceived += (sender, args)
-                => errorOutput.AppendLine(args.Data);
-            dreamMakerProcess.OutputDataReceived += (sender, args)
-                => output.AppendLine(args.Data);
-
-            dreamMakerProcess.Start();
-            dreamMakerProcess.BeginErrorReadLine();
-            dreamMakerProcess.BeginOutputReadLine();
-            dreamMakerProcess.WaitForExit();
-
-            string errors = errorOutput.ToString();
-            string log = output.ToString();
-
-            if (!string.IsNullOrWhiteSpace(errors))
-            {
-                log = errors;
-            }
-
-            result.Output = log;
-            _logger.LogInformation($"Finished compiling {build.Id}");
         }
 
         private UpdateResult Pull(string repository, string username, string commitHash, string branchName)

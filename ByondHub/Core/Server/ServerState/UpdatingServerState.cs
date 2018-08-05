@@ -21,7 +21,7 @@ namespace ByondHub.Core.Server.ServerState
             };
         }
 
-        public override ServerStartStopResult Start(int port, Func<int, ServerStartStopResult> startFunc)
+        public override ServerStartStopResult Start(ushort port, Func<ushort, ServerStartStopResult> startFunc)
         {
             return new ServerStartStopResult()
             {
