@@ -17,7 +17,7 @@ namespace ByondHub.Tests.HubTests
         private readonly Config _config;
         private readonly Mock<IServerUpdater> _updaterMock;
         private readonly Mock<IByondWrapper> _byondMock;
-        private readonly Mock<ILogger> _loggerMock;
+        private readonly Mock<ILogger<ServerInstance>> _loggerMock;
         private readonly Mock<IDreamDaemonProcess> _dreamDaemonProcessMock;
 
         public ServerInstanceTests()
@@ -26,7 +26,7 @@ namespace ByondHub.Tests.HubTests
             _config = _fixture.Create<Config>();
             _updaterMock = new Mock<IServerUpdater>();
             _byondMock = new Mock<IByondWrapper>();
-            _loggerMock = new Mock<ILogger>();
+            _loggerMock = new Mock<ILogger<ServerInstance>>();
             _dreamDaemonProcessMock = new Mock<IDreamDaemonProcess>();
         }
 
