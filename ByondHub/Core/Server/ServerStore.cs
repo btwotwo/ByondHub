@@ -28,7 +28,7 @@ namespace ByondHub.Core.Server
                 _servers.Add(build.Id,
                     new ServerInstance(build, services.GetService<IServerUpdater>(),
                         services.GetService<IByondWrapper>(), services.GetService<IOptions<Config>>(),
-                        services.GetService<ILogger>())
+                        services.GetService<ILogger<ServerInstance>>())
                 );
             }
         }

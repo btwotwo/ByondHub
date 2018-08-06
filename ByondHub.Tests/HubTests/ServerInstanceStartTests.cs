@@ -11,7 +11,7 @@ using Xunit;
 
 namespace ByondHub.Tests.HubTests
 {
-    public class ServerInstanceStartTests
+    public partial class ServerInstanceTests
     {
         private readonly Fixture _fixture;
         private readonly Config _config;
@@ -20,7 +20,7 @@ namespace ByondHub.Tests.HubTests
         private readonly Mock<ILogger> _loggerMock;
         private readonly Mock<IDreamDaemonProcess> _dreamDaemonProcessMock;
 
-        public ServerInstanceStartTests()
+        public ServerInstanceTests()
         {
             _fixture = new Fixture();
             _config = _fixture.Create<Config>();
@@ -119,6 +119,24 @@ namespace ByondHub.Tests.HubTests
             Assert.NotNull(error);
             Assert.True(error.Error);
             Assert.Equal("Server is already started.", error.ErrorMessage);
+        }
+
+        [Fact]
+        public void StartServer_SuccessStart_HandlesUnexpectedExit()
+        {
+            var build = CreateBuildModel();
+            build.Id = "test";
+
+            _byondMock.Setup(x => x.StartDreamDaemon(It.IsAny<DreamDaemonArguments>()))
+                .Returns(_dreamDaemonProcessMock.Object);
+            var instance = CreateServerInstance(build);
+            instance.Start(1234);
+            Assert.IsType<StartedServerState>(instance.State);
+
+            _dreamDaemonProcessMock.Raise(x => x.UnexpectedExit += null, _dreamDaemonProcessMock.Object, 111);
+
+            Assert.IsType<StoppedServerState>(instance.State);
+
         }
 
         private BuildModel CreateBuildModel()

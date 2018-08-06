@@ -18,10 +18,10 @@ namespace ByondHub.Core.Server
 
     public class ServerUpdater : IServerUpdater
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<ServerUpdater> _logger;
         private readonly IByondWrapper _byond;
 
-        public ServerUpdater(ILogger logger, IByondWrapper byond)
+        public ServerUpdater(ILogger<ServerUpdater> logger, IByondWrapper byond)
         {
             _logger = logger;
             _byond = byond;

@@ -18,14 +18,14 @@ namespace ByondHub.Core.Server
         private IDreamDaemonProcess _dreamDaemonProcess;
 
         private readonly IServerUpdater _updater;
-        private readonly ILogger _logger;
+        private readonly ILogger<ServerInstance> _logger;
         private readonly IByondWrapper _byond;
 
         public ServerStateAbstract State { get; set; }
         public BuildModel Build { get; }
         public ServerStatusResult Status { get; }
 
-        public ServerInstance(BuildModel build, IServerUpdater updater, IByondWrapper byond, IOptions<Config> config, ILogger logger)
+        public ServerInstance(BuildModel build, IServerUpdater updater, IByondWrapper byond, IOptions<Config> config, ILogger<ServerInstance> logger)
         {
             string serverAddress = config.Value.Hub.Address;
             Build = build;
@@ -61,6 +61,7 @@ namespace ByondHub.Core.Server
         {
             _dreamDaemonProcess.UnexpectedExit -= HandleUnexpectedExit;
             _dreamDaemonProcess.Kill();
+            _dreamDaemonProcess = null;
             return new ServerStartStopResult { Id = Build.Id, Message = "Server stopped." };
         }
 
@@ -126,6 +127,7 @@ namespace ByondHub.Core.Server
         {
             State = new StoppedServerState(this);
             State.UpdateStatus();
+            _dreamDaemonProcess = null;
             _logger.LogWarning($"Server with id ${Build.Id} unexpectedly stopped. Exit code: ${exitCode}");
         }
     }

@@ -17,9 +17,9 @@ namespace ByondHub.Core.Utility.Byond
     {
         private readonly string _dreamDaemonPath;
         private readonly string _dreamMakerPath;
-        private readonly ILogger _logger;
+        private readonly ILogger<ByondWrapper> _logger;
 
-        public ByondWrapper(IOptions<Config> config, ILogger logger)
+        public ByondWrapper(IOptions<Config> config, ILogger<ByondWrapper> logger)
         {
             _dreamDaemonPath = config.Value.Hub.DreamDaemonPath;
             _dreamMakerPath = config.Value.Hub.DreamMakerPath;
