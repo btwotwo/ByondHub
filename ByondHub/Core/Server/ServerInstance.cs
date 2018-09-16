@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Server.ServerState;
-using ByondHub.Core.Utility;
+using ByondHub.Core.Utility.Byond;
 using ByondHub.Shared.Server;
 using ByondHub.Shared.Server.Updates;
 using Microsoft.AspNetCore.WebUtilities;
@@ -14,30 +14,30 @@ namespace ByondHub.Core.Server
 {
     public class ServerInstance
     {
-        private Process _process;
         private DateTime _playersUpdatedTimestamp;
+        private IDreamDaemonProcess _dreamDaemonProcess;
 
-        private readonly string _dreamDaemonPath;
-        private readonly ServerUpdater _updater;
-        private readonly ILogger _logger;
+        private readonly IServerUpdater _updater;
+        private readonly ILogger<ServerInstance> _logger;
+        private readonly IByondWrapper _byond;
 
         public ServerStateAbstract State { get; set; }
         public BuildModel Build { get; }
         public ServerStatusResult Status { get; }
 
-        public ServerInstance(BuildModel build, IOptions<Config> options, string serverAddress, ILogger logger)
+        public ServerInstance(BuildModel build, IServerUpdater updater, IByondWrapper byond, IOptions<Config> config, ILogger<ServerInstance> logger)
         {
-            var config = options.Value;
+            string serverAddress = config.Value.Hub.Address;
             Build = build;
             Status = new ServerStatusResult() { IsRunning = false, IsUpdating = false, Address = serverAddress, Id = build.Id};
             State = new StoppedServerState(this);
-            _dreamDaemonPath = config.Hub.DreamDaemonPath;
-            _updater = new ServerUpdater(config.Hub.DreamMakerPath, logger);
+            _byond = byond;
             _logger = logger;
             _playersUpdatedTimestamp = DateTime.Now;
+            _updater = updater;
         }
 
-        public ServerStartStopResult Start(int port)
+        public ServerStartStopResult Start(ushort port)
         {
             return State.Start(port, StartInternal);
         }
@@ -59,9 +59,9 @@ namespace ByondHub.Core.Server
         }
         private ServerStartStopResult StopInternal()
         {
-            _process.Exited -= HandleUnexpectedExit;
-            _process.Kill();
-            _process.Dispose();
+            _dreamDaemonProcess.UnexpectedExit -= HandleUnexpectedExit;
+            _dreamDaemonProcess.Kill();
+            _dreamDaemonProcess = null;
             return new ServerStartStopResult { Id = Build.Id, Message = "Server stopped." };
         }
 
@@ -92,32 +92,15 @@ namespace ByondHub.Core.Server
             }
         }
 
-        private ServerStartStopResult StartInternal(int port)
+        private ServerStartStopResult StartInternal(ushort port)
         {
             try
             {
-                var info = new ProcessStartInfo($"{_dreamDaemonPath}")
-                {
-                    Arguments = $"{Build.Path}/{Build.ExecutableName}.dmb {port} -safe -invisible -logself"
-                };
-                _process = new Process
-                {
-                    StartInfo = info,
-                    EnableRaisingEvents = true
-                };
-                _process.Exited += HandleUnexpectedExit;
-                _process.Start();
-
-                if (_process.HasExited)
-                {
-                    return new ServerStartStopResult
-                    {
-                        Error = true,
-                        ErrorMessage = "Failed to start server.",
-                        Id = Build.Id
-                    };
-                }
-
+                string buildPath = $"{Build.Path}/{Build.ExecutableName}.dmb";
+                var startParams = new DreamDaemonArguments(buildPath, port);
+                var dreamDaemon = _byond.StartDreamDaemon(startParams);
+                _dreamDaemonProcess = dreamDaemon;
+                _dreamDaemonProcess.UnexpectedExit += HandleUnexpectedExit;
                 Status.Port = port;
 
                 return new ServerStartStopResult()
@@ -126,8 +109,6 @@ namespace ByondHub.Core.Server
                     Id = Build.Id,
                     Port = port
                 };
-
-    
             }
             catch (Exception ex)
             {
@@ -135,19 +116,19 @@ namespace ByondHub.Core.Server
                 return new ServerStartStopResult()
                 {
                     Error = true,
-                    ErrorMessage = $"Failed to start server. Exception: {ex.Message}",
+                    ErrorMessage = $"Failed to start server. Exception: \"{ex.Message}\"",
                     Id = Build.Id
                 };
             }
             
         }
 
-        private void HandleUnexpectedExit(object sender, EventArgs args)
+        private void HandleUnexpectedExit(object sender, int exitCode)
         {
             State = new StoppedServerState(this);
             State.UpdateStatus();
-            _logger.LogWarning($"Server with id ${Build.Id} unexpectedly stopped. Exit code: ${_process.ExitCode}");
-            _process.Dispose();
+            _dreamDaemonProcess = null;
+            _logger.LogWarning($"Server with id ${Build.Id} unexpectedly stopped. Exit code: ${exitCode}");
         }
     }
 }

@@ -2,6 +2,9 @@
 using ByondHub.Core.Configuration;
 using ByondHub.Core.Middlewares;
 using ByondHub.Core.Server;
+using ByondHub.Core.Utility;
+using ByondHub.Core.Utility.Byond;
+using ByondHub.Core.Utility.Git;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -29,7 +32,10 @@ namespace ByondHub
             Config = configBuilder.Build();
             services.AddMvc();
             services.AddSingleton(Config);
-            services.AddSingleton<ServerStore>();
+            services.AddSingleton<IServerStore, ServerStore>();
+            services.AddTransient<IByondWrapper, ByondWrapper>();
+            services.AddTransient<IServerUpdater, ServerUpdater>();
+            services.AddTransient<GitWrapper>();
             services.Configure<Config>(Config);
             services.AddLogging();
         }

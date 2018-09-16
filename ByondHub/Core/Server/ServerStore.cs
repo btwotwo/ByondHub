@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using ByondHub.Core.Configuration;
+using ByondHub.Core.Utility.Byond;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace ByondHub.Core.Server
 {
-    public class ServerStore
+    public interface IServerStore
+    {
+        ServerInstance GetServer(string id);
+    }
+
+    public class ServerStore : IServerStore
     {
         private readonly Dictionary<string, ServerInstance> _servers;
 
@@ -20,9 +26,9 @@ namespace ByondHub.Core.Server
             foreach (var build in builds)
             {
                 _servers.Add(build.Id,
-                    new ServerInstance(build, options,
-                        config.Hub.Address, services.GetService<ILogger<ServerInstance>>()
-                    )
+                    new ServerInstance(build, services.GetService<IServerUpdater>(),
+                        services.GetService<IByondWrapper>(), services.GetService<IOptions<Config>>(),
+                        services.GetService<ILogger<ServerInstance>>())
                 );
             }
         }
