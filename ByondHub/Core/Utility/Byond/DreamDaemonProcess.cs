@@ -27,17 +27,17 @@ namespace ByondHub.Core.Utility.Byond
             var argsBuilder = new StringBuilder($"{args.ExecutablePath} {args.Port}");
             if (args.Safe)
             {
-                argsBuilder.Append("-safe ");
+                argsBuilder.Append(" -safe ");
             }
 
             if (args.Invisible)
             {
-                argsBuilder.Append("-invisible ");
+                argsBuilder.Append(" -invisible ");
             }
 
             if (args.LogSelf)
             {
-                argsBuilder.Append("-logself ");
+                argsBuilder.Append(" -logself ");
             }
             var info = new ProcessStartInfo(_dreamDaemonPath)
             {
